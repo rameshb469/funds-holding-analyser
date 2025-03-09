@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: funds-holding-analyser
+  profiles:
+    active : local
+  jpa:
+    database: POSTGRESQL
+    show-sql: true
+  datasource:
+    platform: postgres
+    url: jdbc:postgresql://${MF_HOLDING_HOST:localhost}:5432/${MF_HOLDING_DB:funds-holding-analyser}
+    username: ${MF_HOLDING_DB_USERNAME:postgres}
+    password: ${MF_HOLDING_DB_PWD:root}
+    driverClassName: org.postgresql.Driver
+  flyway:
+    enabled: true
+    shouldRepair: true
+    baseline-on-migration: true
+    placeholderReplacement: false
+
+logging:
+  file:
+    name : logs/myapp.log
+    path : logs
+
+
+data:
+  extractor:
+    months : 6
+    max-retry : 5
+
+internal:
+  funds:
+    vanguard:
+      funds-links : https://investor.vanguard.com/investment-products/list/funddetail

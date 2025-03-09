@@ -1,0 +1,3 @@
+rootProject.name = 'funds-holding-analyser'
+include 'holdings-analyser'
+
