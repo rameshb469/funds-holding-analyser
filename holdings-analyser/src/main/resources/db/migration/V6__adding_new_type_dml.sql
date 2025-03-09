@@ -1,0 +1,1 @@
+INSERT INTO FUND_TYPE(NAME, DESCRIPTION) VALUES ('LARGE_MID_CAP', 'Large and Mid cap fund type');

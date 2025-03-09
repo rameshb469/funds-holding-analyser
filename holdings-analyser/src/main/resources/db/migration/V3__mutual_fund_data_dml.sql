@@ -1,0 +1,38 @@
+INSERT INTO MUTUAL_FUND_HOUSE(NAME, DESCRIPTION)
+    VALUES ('QUANT', 'Quant Mutual Fund'),
+           ('TATA', 'Tata Mutual Fund'),
+           ('NIPPON', 'Nippon Mutual Fund'),
+           ('AXIS', 'Axis Mutual Fund'),
+           ('MIRAE', 'Mirae Mutual Fund'),
+           ('BOI', 'Bank Of India Mutual Fund'),
+           ('CR', 'Canra Roboco Mutual Fund'),
+           ('HSBC', 'HSBC Mutual Fund'),
+           ('JM_FIN', 'JM Financials Mutual Fund'),
+           ('SBI', 'Sate Bank of India(SBI) Mutual Fund'),
+           ('DSP', 'DSP Mutual Fund'),
+           ('KOTAK', 'Kotak Mutual Fund'),
+           ('EDELWEISS', 'Edelweiss Mutual Fund'),
+           ('HDFC', 'HDFC Mutual Fund'),
+           ('IDFC', 'IDFC Mutual Fund'),
+           ('ABSL', 'Aditya Birla Sun Life Mutual Fund'),
+           ('ICICI', 'ICICI Prudential Mutual Fund'),
+           ('UNION', 'Union Mutual Fund');
+
+
+INSERT INTO FUND_TYPE(NAME, DESCRIPTION)
+    VALUES ('LARGE_CAP', 'Large/Blue chip cap fund type'),
+         ('MID_CAP', 'Mid cap fund type'),
+         ('FLEXI_CAP', 'Flexi cap fund type'),
+         ('HYBRID', 'Hybrid fund type'),
+         ('ELSS', 'ELSS fund type'),
+         ('INDEX', 'Index fund type'),
+         ('Sectoral (Infrastructure)', 'Sectoral (Infrastructure)'),
+         ('Sectoral (Consumption)', 'Sectoral (Consumption)'),
+         ('Sectoral (Healthcare)', 'Sectoral (Healthcare)'),
+         ('Sectoral (Technology)', 'Sectoral (Technology)'),
+         ('Sectoral (Banking & Financial Services)', 'Sectoral (Banking & Financial Services)'),
+         ('Sectoral (Energy)', 'Sectoral (Energy)'),
+         ('Sectoral (Agriculture)', 'Sectoral (Agriculture)'),
+         ('Sectoral (Real Estate)', 'Sectoral (Real Estate)'),
+         ('Sectoral (Automobile)', 'Sectoral (Automobile)'),
+         ('SMALL_CAP', 'Small cap fund type');
