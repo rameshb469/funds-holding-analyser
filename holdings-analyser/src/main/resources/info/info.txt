@@ -1,2 +1,38 @@
 Information about the mutual funds type
 https://www.amfiindia.com/investor-corner/knowledge-center/SEBI-categorization-of-mutual-fund-schemes.html
+
+delete
+Quant Multi Cap Fund
+Quant Energy Fund
+Quant Agri Fund
+Quant Realty Fund
+Quant Auto Fund
+
+https://quantmutual.com/Admin/disclouser/quant_BFSI_Fund
+Remove config
+AXIS : https://www.axismf.com/cms/sites/default/files/Statutory/Monthly Portfolio as on Sep 30 2024.xlsx
+
+check mapping
+SBI Magnum Midcap Fund
+SBI Equity Hybrid Fund
+SBI Consumption Opportunities Fund
+SBI Magnum Taxgain Scheme
+SBI Flexicap Fund (https://www.sbimf.com/docs/default-source/scheme-portfolios/all-schemes-monthly-portfolio---as-on-31st-December-2024.xlsx)
+
+
+
+Nippon Growth Fund --> GS
+Nippon Vision Fund --> GS
+Nippon Banking & Financial Services Fund -> BF
+Nippon Hybrid Bond Fund --> SH
+Nippon Power & Infra Fund -> PS
+Nippon Consumption Fund --> ME
+Nippon Pharma Fund --> PH
+Nippon Multi Cap Fund --> EO
+Nippon Value Fund -->  SE
+Nippon ELSS Tax Saver Fund -->  TS
+Nippon Focused Equity Fund --> LE
+Nippon Large Cap Fund --> EA
+Nippon Nifty 50 Plan --> NF
+Nippon Small Cap Fund -->SC
+Nippon BSE Sensex Plan --> SF
