@@ -22,11 +22,11 @@ public class MutualFundConfigEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
+    @Column(name = "mutual_fund_id")
     private Long mutualFundId;
 
     @OneToOne
-    @PrimaryKeyJoinColumn
+//    @PrimaryKeyJoinColumn
     @JoinColumn(name = "mutual_fund_id", insertable = false, updatable = false)
     private MutualFundEntity mutualFund;
 

@@ -29,7 +29,7 @@ public class ExcelDownloaderImpl implements ExcelDownloader {
 
         File file = null;
         try {
-            URL excelUrl = new URL(attributes.getUrl().toLowerCase());
+            URL excelUrl = new URL(attributes.getUrl());
 //            Runtime rt = Runtime.getRuntime();
 //            InputStream inputStream2 = rt.exec("rundll32 url.dll,FileProtocolHandler " + attributes.getUrl())
 //                    .getInputStream();
@@ -82,16 +82,19 @@ public class ExcelDownloaderImpl implements ExcelDownloader {
             return process(file, attributes);
         } catch (FileNotFoundException nf) {
             System.out.println("File not found" + nf.getMessage());
+
+            throw new RuntimeException("FileNotFoundException");
         } catch (Exception e) {
             e.printStackTrace();
             // Exception
+            throw  new RuntimeException(e.getMessage());
         } finally {
             if (file != null) {
                 file.delete();
             }
         }
 
-        return Collections.emptyList();
+       // return Collections.emptyList();
     }
 
     @Override
@@ -302,7 +305,8 @@ public class ExcelDownloaderImpl implements ExcelDownloader {
                             .netAssetPerc(row.getCell(attributes.getSheetColumnMapper().getNetAssetPerc()).getNumericCellValue())
                             .build());
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    //e.printStackTrace();
+                    throw e;
                 }
             }
 
