@@ -30,6 +30,7 @@ public class FileDownloaderImpl implements FileDownloader{
         Map<String, String> headers = new LinkedHashMap<>();
         headers.put("Content-disposition", "form-data; name=file; filename="+fileName+".xlsx");
         headers.put("Content-type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        headers.put("User-Agent",  "PostmanRuntime/7.37.3");
         //headers.put("Origin", uri.getHost());
         File file = restTemplate.execute(url, HttpMethod.GET, clientHttpRequest ->
                 clientHttpRequest.getHeaders().setAll(headers),

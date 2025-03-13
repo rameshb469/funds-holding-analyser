@@ -42,7 +42,7 @@ public class MutualFundEntity {
     @JoinColumn(name = "FUND_TYPE_ID", insertable = false, updatable = false)
     private MutualFundTypeEntity typeEntity;
 
-    @Column(name = "is_international_fund")
+    @Column(name = "is_internation_fund")
     private boolean isInternationalFund;
 
     @CreatedDate
