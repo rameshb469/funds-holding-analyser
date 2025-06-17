@@ -296,6 +296,7 @@ public class ExcelDownloaderImpl implements ExcelDownloader {
             for (Row row : holdingDataRows) {
 
                 try {
+
                     stockHoldingList.add(MutualFundStockHolding.builder()
                             .isinCode(row.getCell(attributes.getSheetColumnMapper().getIsin()).getStringCellValue())
                             .stockName(row.getCell(attributes.getSheetColumnMapper().getStockName()).getStringCellValue())

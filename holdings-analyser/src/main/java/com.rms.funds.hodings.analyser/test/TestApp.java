@@ -40,9 +40,10 @@ public class TestApp implements CommandLineRunner {
     public void run(String... args) throws Exception {
         Map<Long, List<MutualFundConfigEntity>> configEntitiesMap = mutualFundConfigRepository.findAll().stream()
                 .filter(x -> x.getMutualFund() != null)
-                .filter(x -> x.getId().equals(73L))
+                .filter(MutualFundConfigEntity::getIsActive)
+         //       .filter(x -> x.getId().equals(73L))
                 //.filter(x -> x.getMutualFundId().equals(195L))
-                //.filter(x -> x.getMutualFund().getMutualFundHouseId().equals(18L))
+                .filter(x -> x.getMutualFund().getMutualFundHouseId().equals(5L))
                 .collect(Collectors.groupingBy(MutualFundConfigEntity::getMutualFundId));
 
        // configEntities = Arrays.asList(configEntities.get(0));
@@ -99,9 +100,9 @@ public class TestApp implements CommandLineRunner {
         @Override
         public Result call() throws IOException {
             String link = downloadLinkPair.getLeft();
-            if (config.getMutualFund() != null && config.getMutualFund().getMutualFundHouseId().equals(18)) {
-                link = downloadLinkPair.getLeft().toLowerCase();
-            }
+//            if (config.getMutualFund() != null && config.getMutualFund().getMutualFundHouseId().equals(18)) {
+//                link = downloadLinkPair.getLeft().toLowerCase();
+//            }
 
             LocalDate atDate = downloadLinkPair.getRight();
 

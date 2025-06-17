@@ -1,5 +1,6 @@
 package com.rms.funds.hodings.analyser.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,6 +10,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Entity
 @Table(name = "mutual_fund_config")
@@ -92,5 +94,17 @@ public class MutualFundConfigEntity {
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
+    @Column(name = "is_active")
+    private Boolean isActive;
+
+    @JsonIgnore
+    public String getFundHouseName() {
+        return Optional.of(this)
+                .map(MutualFundConfigEntity::getMutualFund)
+                .map(MutualFundEntity::getHouseEntity)
+                .map(MutualFundHouseEntity::getName)
+                .orElse(null);
+    }
 
 }
