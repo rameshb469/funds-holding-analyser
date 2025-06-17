@@ -10,6 +10,9 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 
+import static com.rms.funds.hodings.analyser.utility.MutualFundStringSubstitutorUtil.applyCustomReplacer;
+import static com.rms.funds.hodings.analyser.utility.MutualFundStringSubstitutorUtil.isCustomReplacerRequired;
+
 public class DateUtil {
     private static final String DATE_MAPPER_1 = "DATE_MAPPER_1";
 
@@ -36,13 +39,13 @@ public class DateUtil {
                 Map<String, Object> placeholder = new HashMap<>();
                 LocalDate lastDayOfMonth = lastMonth.with(TemporalAdjusters.lastDayOfMonth());
                 placeholder.put(DATE_MAPPER_1, getDateValue(config.getDateMapper1(),
-                        lastDayOfMonth, config.getDateMapper1Config()));
+                        lastDayOfMonth, config.getDateMapper1Config(), config.getFundHouseName()));
                 placeholder.put(DATE_MAPPER_2, getDateValue(config.getDateMapper2(),
-                        lastDayOfMonth, config.getDateMapper2Config()));
+                        lastDayOfMonth, config.getDateMapper2Config(), config.getFundHouseName()));
                 placeholder.put(DATE_MAPPER_3, getDateValue(config.getDateMapper3(),
-                        lastDayOfMonth, config.getDateMapper3Config()));
+                        lastDayOfMonth, config.getDateMapper3Config(), config.getFundHouseName()));
                 placeholder.put(DATE_MAPPER_4, getDateValue(config.getDateMapper4(),
-                        lastDayOfMonth, config.getDateMapper4Config()));
+                        lastDayOfMonth, config.getDateMapper4Config(), config.getFundHouseName()));
                 placeholder.put(CURRENT_DATE_KEY, lastDayOfMonth);
                 placeholderList.add(placeholder);
 
@@ -60,7 +63,7 @@ public class DateUtil {
         return List.of(Pair.of(downloadUrl, LocalDate.now().minusMonths(1)));
     }
 
-    private static String getDateValue(String pattern, LocalDate date, String dateConfig) {
+    private static String getDateValue(String pattern, LocalDate date, String dateConfig, String mutualFundHouseName) {
 
         if (!StringUtils.isEmpty(pattern)) {
 
@@ -76,9 +79,13 @@ public class DateUtil {
             }
 
             String dateValue = simpleDateFormat.format(date);
+            if (isCustomReplacerRequired(mutualFundHouseName)){
+                dateValue = applyCustomReplacer(mutualFundHouseName, dateValue);
+            }
             if (requiredDayTag) {
                 return getDayOfMonthSuffix(dateValue.substring(0, 2)) + dateValue.substring(2);
             }
+
 
             return dateValue;
         }

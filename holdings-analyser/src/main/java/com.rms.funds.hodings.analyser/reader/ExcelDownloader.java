@@ -13,6 +13,6 @@ public interface ExcelDownloader {
 
     List<MutualFundStockHolding> process(File file, String sheetName, SheetColumnMapper columnMapper);
 
-    public List<MutualFundStockHolding> process(File file, ExcelDownloaderAttributes attributes);
+    List<MutualFundStockHolding> process(File file, ExcelDownloaderAttributes attributes);
 
     }
