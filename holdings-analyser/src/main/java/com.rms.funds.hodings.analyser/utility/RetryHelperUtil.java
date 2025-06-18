@@ -49,8 +49,16 @@ public class RetryHelperUtil {
         if (MIRAE_MF.equalsIgnoreCase(mutualFundHouseName)){
             url = url.toLowerCase();
 
-            if (url.contains("-may2025")){
-                url = url.replace("-may2025", "_may2025");
+            if (url.contains("miccf_feb2025")){
+                url = url.replace("miccf_feb2025", "miicf_feb2025");
+            }
+
+            if (url.contains("_may2025")){
+                url = url.replace("_may2025", "-may2025");
+            }
+
+            if (url.contains("mar2025")) {
+                url = url.replace("mar2025", "march2025");
             }
 
             if (url.contains("sep2024")) {
@@ -61,8 +69,8 @@ public class RetryHelperUtil {
                 url = url.replace("aug2024", "31aug2024");
             }
 
-            if (url.contains("jul")) {
-                url = url.replace("jul", "july");
+            if (url.contains("_jul")) {
+                url = url.replace("_jul", "-july");
             }
 
             if (url.contains("jun")) {
