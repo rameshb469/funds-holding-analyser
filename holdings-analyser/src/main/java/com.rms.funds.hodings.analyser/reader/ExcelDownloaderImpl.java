@@ -17,6 +17,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.*;
 
+import static com.rms.funds.hodings.analyser.utility.ValueUtil.getNetAssetPerc;
+
 @Service
 public class ExcelDownloaderImpl implements ExcelDownloader {
 
@@ -303,7 +305,8 @@ public class ExcelDownloaderImpl implements ExcelDownloader {
                             .industry(row.getCell(attributes.getSheetColumnMapper().getIndustry()).getStringCellValue())
                             .quantity((long) row.getCell(attributes.getSheetColumnMapper().getQuantity()).getNumericCellValue())
                             .marketValue(row.getCell(attributes.getSheetColumnMapper().getMarketValue()).getNumericCellValue())
-                            .netAssetPerc(row.getCell(attributes.getSheetColumnMapper().getNetAssetPerc()).getNumericCellValue())
+                            .netAssetPerc(getNetAssetPerc(row, attributes.getSheetColumnMapper().getNetAssetPerc()))
+                            //.netAssetPerc(row.getCell(attributes.getSheetColumnMapper().getNetAssetPerc()).getNumericCellValue())
                             .build());
                 } catch (Exception e) {
                     //e.printStackTrace();
