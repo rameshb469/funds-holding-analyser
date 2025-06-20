@@ -1,0 +1,12 @@
+Refer below link for all monthly disclours
+https://www.amfiindia.com/investor-corner/online-center/portfoliodisclosure
+
+Kotak MF
+--------
+1. Kotak is allowing only 20 mutual fund download at a time.
+  a. we need to check how we can handle it.
+
+
+NIPPON MF
+--------
+1. Link is working but mutual fund allowing only https:// origins

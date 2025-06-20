@@ -12,6 +12,7 @@ public class RetryHelperUtil {
 
     private static final String TATA =  "TATA";
     private static final String MIRAE_MF = "MIRAE";
+    private static final String UNION_MF = "UNION";
 
     private static final Map<String, String> updateLinks = new HashMap<>();
 
@@ -20,6 +21,7 @@ public class RetryHelperUtil {
     static {
         retryMutualFunds.add(TATA);
         retryMutualFunds.add(MIRAE_MF);
+        retryMutualFunds.add(UNION_MF);
 
         updateLinks.put("https://betacms.tatamutualfund.com/system/files/2024-09/Monthly Portfolio as on 31st August 2024.xlsx",
                 "https://betacms.tatamutualfund.com/system/files/2024-09/Monthly Portfolio as on 30th August 2024.xlsx");
@@ -76,6 +78,10 @@ public class RetryHelperUtil {
             if (url.contains("jun")) {
                 url = url.replace("jun", "june");
             }
+        }
+
+        if (UNION_MF.equalsIgnoreCase(mutualFundHouseName)){
+            url = url.toLowerCase();
         }
 
         return Pair.of(url, attributes);
