@@ -1,0 +1,3 @@
+update mutual_fund_config
+set download_url = 'https://unionmf.com/docs/default-source/funddetail-downloads/fund-portfolio/${DATE_MAPPER_1}/monthly-portfolio-report-union-large-midcap-fund-${DATE_MAPPER_2}.xlsx'
+where download_url = 'https://unionmf.com/docs/default-source/funddetail-downloads/fund-portfolio/${DATE_MAPPER_1}/monthly-portfolio-report-union-large-and-midcap-fund-${DATE_MAPPER_2}.xlsx';
