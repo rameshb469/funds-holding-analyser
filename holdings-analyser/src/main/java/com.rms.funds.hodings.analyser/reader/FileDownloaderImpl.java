@@ -16,17 +16,24 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.rms.funds.hodings.analyser.utility.RetryHelperUtil.isRetryRequired;
-import static com.rms.funds.hodings.analyser.utility.RetryHelperUtil.updateAttributes;
+import static com.rms.funds.hodings.analyser.utility.RetryHelperUtil.*;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class FileDownloaderImpl implements FileDownloader{
 
+    private final RestTemplate nipponMFApiRestTemplate;
     private final RestTemplate restTemplate;
 
     private final ExcelDownloader excelDownloader;
+
+    private RestTemplate getRestTemplate(final ExcelDownloaderAttributes attributes) {
+        if (NIPPON.equalsIgnoreCase(attributes.getMutualFundHouse())) {
+            return nipponMFApiRestTemplate;
+        }
+        return restTemplate;
+    }
 
     @Override
     public List<MutualFundStockHolding> downloadExcelFile(final String url,
@@ -53,7 +60,7 @@ public class FileDownloaderImpl implements FileDownloader{
             headers.put("Content-type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
             headers.put("User-Agent",  "PostmanRuntime/7.37.3");
            // headers.put("Host", uri.getHost());
-            File file = restTemplate.execute(url, HttpMethod.GET, clientHttpRequest ->
+            File file = getRestTemplate(attributes).execute(url, HttpMethod.GET, clientHttpRequest ->
                             clientHttpRequest.getHeaders().setAll(headers),
                     clientHttpResponse -> {
                         File ret = File.createTempFile("download", "tmp");

@@ -17,7 +17,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.*;
 
-import static com.rms.funds.hodings.analyser.utility.ValueUtil.getNetAssetPerc;
+import static com.rms.funds.hodings.analyser.utility.ValueUtil.*;
 
 @Service
 public class ExcelDownloaderImpl implements ExcelDownloader {
@@ -27,11 +27,11 @@ public class ExcelDownloaderImpl implements ExcelDownloader {
 
     @Async
     @Override
-    public List<MutualFundStockHolding> load(ExcelDownloaderAttributes attributes) {
+    public List<MutualFundStockHolding> load(String url, ExcelDownloaderAttributes attributes) {
 
         File file = null;
         try {
-            URL excelUrl = new URL(attributes.getUrl());
+            URL excelUrl = new URL(url);
 //            Runtime rt = Runtime.getRuntime();
 //            InputStream inputStream2 = rt.exec("rundll32 url.dll,FileProtocolHandler " + attributes.getUrl())
 //                    .getInputStream();
@@ -39,11 +39,11 @@ public class ExcelDownloaderImpl implements ExcelDownloader {
 
             URLConnection urlConnection = excelUrl.openConnection();
             //        System.setProperty ("jsse.enableSNIExtension", "false");
-//            urlConnection.setRequestProperty("vary", "Accept-Encoding");
-//            urlConnection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36");
-//            urlConnection.setRequestProperty("Accept", "*/*");
-//            urlConnection.setRequestProperty("Accept-Encoding", "gzip, deflate, br");
-//            urlConnection.setRequestProperty("Origin","https://"+excelUrl.getHost());
+            urlConnection.setRequestProperty("vary", "Accept-Encoding");
+            urlConnection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36");
+            urlConnection.setRequestProperty("Accept", "*/*");
+            urlConnection.setRequestProperty("Accept-Encoding", "gzip, deflate, br");
+            urlConnection.setRequestProperty("Origin","https://"+excelUrl.getHost());
             //  urlConnection.setRequestProperty("Cookie", cookingService.geCookie(excelUrl,attributes.getUrl()));
 
 
@@ -300,16 +300,17 @@ public class ExcelDownloaderImpl implements ExcelDownloader {
                 try {
 
                     stockHoldingList.add(MutualFundStockHolding.builder()
-                            .isinCode(row.getCell(attributes.getSheetColumnMapper().getIsin()).getStringCellValue())
-                            .stockName(row.getCell(attributes.getSheetColumnMapper().getStockName()).getStringCellValue())
-                            .industry(row.getCell(attributes.getSheetColumnMapper().getIndustry()).getStringCellValue())
-                            .quantity((long) row.getCell(attributes.getSheetColumnMapper().getQuantity()).getNumericCellValue())
-                            .marketValue(row.getCell(attributes.getSheetColumnMapper().getMarketValue()).getNumericCellValue())
+                            .isinCode(getStringValue(row, attributes.getSheetColumnMapper().getIsin()))
+                           // .isinCode(row.getCell(attributes.getSheetColumnMapper().getIsin()).getStringCellValue())
+                            .stockName(getStringValue(row, attributes.getSheetColumnMapper().getStockName()))
+                            .industry(getStringValue(row, attributes.getSheetColumnMapper().getIndustry()))
+                            .quantity((getQuantity(row, attributes.getSheetColumnMapper().getQuantity())))
+                            .marketValue(getMarketValue(row, attributes.getSheetColumnMapper().getMarketValue()))
                             .netAssetPerc(getNetAssetPerc(row, attributes.getSheetColumnMapper().getNetAssetPerc()))
                             //.netAssetPerc(row.getCell(attributes.getSheetColumnMapper().getNetAssetPerc()).getNumericCellValue())
                             .build());
                 } catch (Exception e) {
-                    //e.printStackTrace();
+                    e.printStackTrace();
                     throw e;
                 }
             }
