@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface ExcelDownloader {
 
-    List<MutualFundStockHolding> load(ExcelDownloaderAttributes attributes);
+    List<MutualFundStockHolding> load(String url, ExcelDownloaderAttributes attributes);
 
     List<MutualFundStockHolding> process(File file, String sheetName, SheetColumnMapper columnMapper);
 

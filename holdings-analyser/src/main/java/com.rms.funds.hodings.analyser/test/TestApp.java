@@ -42,13 +42,13 @@ public class TestApp implements CommandLineRunner {
                 .filter(x -> x.getMutualFund() != null)
                 .filter(MutualFundConfigEntity::getIsActive)
          //       .filter(x -> x.getId().equals(73L))
-                //.filter(x -> x.getMutualFundId().equals(195L))
-                .filter(x -> x.getMutualFund().getMutualFundHouseId().equals(5L))
+          //      .filter(x -> x.getMutualFundId().equals(140L))
+                .filter(x -> x.getMutualFund().getMutualFundHouseId().equals(8L))
                 .collect(Collectors.groupingBy(MutualFundConfigEntity::getMutualFundId));
 
        // configEntities = Arrays.asList(configEntities.get(0));
 
-        ExecutorService executorService = Executors.newFixedThreadPool(5);
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
 
         List<Future<Result>> futures = new ArrayList<>();
         List<Result> results = new ArrayList<>();

@@ -10,9 +10,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 
-import static com.rms.funds.hodings.analyser.utility.MutualFundStringSubstitutorUtil.applyCustomReplacer;
-import static com.rms.funds.hodings.analyser.utility.MutualFundStringSubstitutorUtil.isCustomReplacerRequired;
-
 public class DateUtil {
     private static final String DATE_MAPPER_1 = "DATE_MAPPER_1";
 
@@ -79,9 +76,9 @@ public class DateUtil {
             }
 
             String dateValue = simpleDateFormat.format(date);
-            if (isCustomReplacerRequired(mutualFundHouseName)){
-                dateValue = applyCustomReplacer(mutualFundHouseName, dateValue);
-            }
+//            if (isCustomReplacerRequired(mutualFundHouseName)){
+//                dateValue = applyCustomReplacer(mutualFundHouseName, dateValue);
+//            }
             if (requiredDayTag) {
                 return getDayOfMonthSuffix(dateValue.substring(0, 2)) + dateValue.substring(2);
             }

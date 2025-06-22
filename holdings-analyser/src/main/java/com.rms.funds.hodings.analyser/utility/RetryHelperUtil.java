@@ -13,6 +13,9 @@ public class RetryHelperUtil {
     private static final String TATA =  "TATA";
     private static final String MIRAE_MF = "MIRAE";
     private static final String UNION_MF = "UNION";
+    private static final String QUANT = "QUANT";
+    private static final String HSBC = "HSBC";
+    public static final String NIPPON = "NIPPON";
 
     private static final Map<String, String> updateLinks = new HashMap<>();
 
@@ -22,9 +25,21 @@ public class RetryHelperUtil {
         retryMutualFunds.add(TATA);
         retryMutualFunds.add(MIRAE_MF);
         retryMutualFunds.add(UNION_MF);
+        retryMutualFunds.add(QUANT);
+        retryMutualFunds.add(HSBC);
+        retryMutualFunds.add(NIPPON);
 
         updateLinks.put("https://betacms.tatamutualfund.com/system/files/2024-09/Monthly Portfolio as on 31st August 2024.xlsx",
                 "https://betacms.tatamutualfund.com/system/files/2024-09/Monthly Portfolio as on 30th August 2024.xlsx");
+
+        updateLinks.put("https://mf.nipponindiaim.com/InvestorServices/FactsheetsDocuments/NIMF-MONTHLY-PORTFOLIO-31-Aug-24.xls",
+                "https://mf.nipponindiaim.com/InvestorServices/FactsheetsDocuments/NIMF_MONTHLY_PORTFOLIO_31-Aug-24.xls");
+
+        updateLinks.put("https://mf.nipponindiaim.com/InvestorServices/FactsheetsDocuments/NIMF-MONTHLY-PORTFOLIO-31-Jan-25.xls",
+                "https://mf.nipponindiaim.com/InvestorServices/FactsheetsDocuments/NIMF_MONTHLY_PORTFOLIO_31-Jan-25.xls");
+
+        updateLinks.put("https://www.assetmanagement.hsbc.co.in/-/media/files/attachments/india/mutual-funds/portfolios/document-30092024/hsbc-large-mid-cap-fund-30-sep-2024.xlsx",
+                "https://www.assetmanagement.hsbc.co.in/en/mutual-funds/investor-resources/-/media/files/attachments/india/mutual-funds/portfolios/document-30092024/hsbc-large-and-mid-cap-fund-30-september-2024.xlsx");
     }
 
     public static boolean isRetryRequired(ExcelDownloaderAttributes attributes) {
@@ -37,6 +52,23 @@ public class RetryHelperUtil {
     public static Pair<String, ExcelDownloaderAttributes> updateAttributes(String url,
                                                                            ExcelDownloaderAttributes attributes){
         String mutualFundHouseName = attributes.getMutualFundHouse();
+
+        if (QUANT.equalsIgnoreCase(mutualFundHouseName)){
+
+            if (url.contains("Jun")){
+                url = url.replace("Jun", "June");
+            }
+
+            if (url.contains("Jul")){
+                url = url.replace("Jul", "July");
+            }
+
+            if (url.contains("Sept")){
+                url = url.replace("Sept","Sep");
+            }
+
+            return Pair.of(url, attributes);
+        }
 
         if (TATA.equalsIgnoreCase(mutualFundHouseName)) {
 
@@ -82,6 +114,48 @@ public class RetryHelperUtil {
 
         if (UNION_MF.equalsIgnoreCase(mutualFundHouseName)){
             url = url.toLowerCase();
+        }
+
+        if (HSBC.equalsIgnoreCase(mutualFundHouseName)){
+
+            try {
+                Thread.sleep(10000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+            if (updateLinks.containsKey(url)) {
+                url = updateLinks.get(url);
+            } else {
+                url = url.toLowerCase();
+            }
+        }
+
+        if (NIPPON.equalsIgnoreCase(mutualFundHouseName)) {
+
+            if (url.contains("Jun")){
+                url = url.replace("Jun", "June");
+            }
+
+            if (url.contains("Jul")){
+                url = url.replace("Jul", "July");
+            }
+
+            if (url.contains("Apr")){
+                url = url.replace("Apr", "April");
+            }
+
+            if (url.contains("30-Nov-24")) {
+                url = url.replace("30-Nov-24", "30-Nov-2024");
+            }
+
+            if (url.contains("Sept")){
+                url = url.replace("Sept","Sep");
+            }
+
+            if (updateLinks.containsKey(url)) {
+                url = updateLinks.get(url);
+            }
         }
 
         return Pair.of(url, attributes);
