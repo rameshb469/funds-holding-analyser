@@ -43,7 +43,7 @@ public class TestApp implements CommandLineRunner {
                 .filter(MutualFundConfigEntity::getIsActive)
          //       .filter(x -> x.getId().equals(73L))
           //      .filter(x -> x.getMutualFundId().equals(140L))
-                .filter(x -> x.getMutualFund().getMutualFundHouseId().equals(8L))
+                .filter(x -> x.getMutualFund().getMutualFundHouseId().equals(7L))
                 .collect(Collectors.groupingBy(MutualFundConfigEntity::getMutualFundId));
 
        // configEntities = Arrays.asList(configEntities.get(0));
