@@ -16,6 +16,7 @@ public class RetryHelperUtil {
     private static final String QUANT = "QUANT";
     private static final String HSBC = "HSBC";
     public static final String NIPPON = "NIPPON";
+    public static final String CR = "CR";
 
     private static final Map<String, String> updateLinks = new HashMap<>();
 
@@ -28,6 +29,7 @@ public class RetryHelperUtil {
         retryMutualFunds.add(QUANT);
         retryMutualFunds.add(HSBC);
         retryMutualFunds.add(NIPPON);
+        retryMutualFunds.add(CR);
 
         updateLinks.put("https://betacms.tatamutualfund.com/system/files/2024-09/Monthly Portfolio as on 31st August 2024.xlsx",
                 "https://betacms.tatamutualfund.com/system/files/2024-09/Monthly Portfolio as on 30th August 2024.xlsx");
@@ -156,6 +158,10 @@ public class RetryHelperUtil {
             if (updateLinks.containsKey(url)) {
                 url = updateLinks.get(url);
             }
+        }
+
+        if (CR.equalsIgnoreCase(mutualFundHouseName)){
+            url = url.toLowerCase();
         }
 
         return Pair.of(url, attributes);
