@@ -29441,7 +29441,7 @@
     "industry": "Automobile - Passenger Cars",
     "created_at": "2024-03-16 18:18:31.471186",
     "updated_at": "2024-03-16 18:18:31.471186",
-    "sector": "z",
+    "sector": "Automobile & Ancillaries",
 
     "mkt_cap": 387900
   },
@@ -29549,5 +29549,35 @@
     "updated_at": "2024-03-16 18:18:31.461214",
     "sector": "Hospitality",
     "mkt_cap": 709
+  },
+  {
+    "symbol": "ENRIN",
+    "name_of_company": "Siemens Energy India Ltd",
+    "series": "EQ",
+    "date_of_listing": "2025-07-09",
+    "paid_up_value": 10,
+    "market_lot": 1,
+    "isin_number": "INE1NPP01017",
+    "face_value": 10,
+    "industry": "Electric Equipment",
+    "created_at": "2024-03-16 18:18:31.46221",
+    "updated_at": "2024-03-16 18:18:31.46221",
+    "sector": "Capital Goods",
+    "mkt_cap": 25483
+  },
+  {
+    "symbol": "MAHLIFE",
+    "name_of_company": "Mahindra Lifespace Developers Ltd",
+    "series": "EQ",
+    "date_of_listing": "2025-06-18",
+    "paid_up_value": 2,
+    "market_lot": 1,
+    "isin_number": "INE813A20018",
+    "face_value": 2,
+    "industry": "Construction - Residential & Commercial Complexes",
+    "created_at": "2024-03-16 18:18:31.461214",
+    "updated_at": "2024-03-16 18:18:31.461214",
+    "sector": "Real Estate",
+    "mkt_cap": 6864
   }
 ]
