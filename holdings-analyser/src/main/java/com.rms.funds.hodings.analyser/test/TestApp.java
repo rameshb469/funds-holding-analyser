@@ -4,6 +4,7 @@ import com.opencsv.CSVWriter;
 import com.rms.funds.hodings.analyser.entity.MutualFundConfigEntity;
 import com.rms.funds.hodings.analyser.modal.ExcelDownloaderAttributes;
 import com.rms.funds.hodings.analyser.modal.MutualFundStockHolding;
+import com.rms.funds.hodings.analyser.modal.Result;
 import com.rms.funds.hodings.analyser.modal.SheetColumnMapper;
 import com.rms.funds.hodings.analyser.reader.FileDownloader;
 import com.rms.funds.hodings.analyser.repository.ExtractorJobRepository;
@@ -114,11 +115,11 @@ public class TestApp implements CommandLineRunner {
             try {
                 var list = extractFileUsingRest(getAttributes(link, config));
                 result.setCount(list.size());
-                result.setStatus("OK");
+                result.setStatus(Result.Status.SUCCESSFUL);
 
             } catch (Exception e) {
                 result.setError(e.getMessage());
-                result.setStatus("ERROR");
+                result.setStatus(Result.Status.FAILED);
             }
 
             return result;
@@ -158,7 +159,7 @@ public class TestApp implements CommandLineRunner {
         Iterator<Result> it = emps.iterator();
         while (it.hasNext()) {
             Result emp = it.next();
-            records.add(new String[] { emp.getName(), emp.getDownloadLink(), emp.getAtDate(), emp.getCount()+"",  emp.getError(), emp.getStatus()});
+            records.add(new String[] { emp.getName(), emp.getDownloadLink(), emp.getAtDate(), emp.getCount()+"",  emp.getError(), emp.getStatus().name()});
         }
         return records;
     }
