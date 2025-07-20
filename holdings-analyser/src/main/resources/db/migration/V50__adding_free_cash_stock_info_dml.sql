@@ -1,0 +1,1 @@
+INSERT INTO stock_details (symbol, name_of_company, industry_id, sector_id, mkt_cap, series, date_of_listing, isin_number, face_value, created_at, updated_at) VALUES ('CASH', 'Free Cash', 62, 6, 49000, 'EQ', '2024-09-07', 'FREE_CASH', 1, '2025-07-19 11:14:34', '2025-07-19 11:14:34');

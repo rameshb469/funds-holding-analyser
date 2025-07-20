@@ -23,7 +23,11 @@ public class ExtractorJobEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "mutual_fund_config_id")
+    private Long mutualFundConfigId;
+
     @OneToOne
+    @JoinColumn(name = "mutual_fund_config_id", insertable = false, updatable = false)
     private MutualFundConfigEntity config;
 
     @Column(name = "URL")
@@ -36,10 +40,16 @@ public class ExtractorJobEntity {
     private String error;
 
     @Builder.Default
+    @Column(name = "record_count")
     private int recordCount = 0;
 
+    @Builder.Default
+    @Column(name = "retry_count")
+    private int retryCount = 0;
+
     @CreatedDate
-    private LocalDateTime createdAt;
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @LastModifiedDate
     private LocalDateTime updatedAt;

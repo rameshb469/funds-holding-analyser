@@ -22,7 +22,7 @@ INSERT INTO industry (id, name, description, sector_id, created_at, updated_at) 
 INSERT INTO industry (id, name, description, sector_id, created_at, updated_at) VALUES (22, 'Ground Freight & Logistics Services', 'Ground Freight & Logistics Services', 12, '2025-07-19 11:14:34', '2025-07-19 11:14:34');
 INSERT INTO industry (id, name, description, sector_id, created_at, updated_at) VALUES (23, 'Power Generation/Distribution', 'Power Generation/Distribution', 13, '2025-07-19 11:14:34', '2025-07-19 11:14:34');
 INSERT INTO industry (id, name, description, sector_id, created_at, updated_at) VALUES (24, 'Trading', 'Trading', 14, '2025-07-19 11:14:34', '2025-07-19 11:14:34');
-INSERT INTO industry (id, name, description, sector_id, created_at, updated_at) VALUES (25, 'Renewables', 'Renewables', 6, '2025-07-19 11:14:34', '2025-07-19 11:14:34');
+INSERT INTO industry (id, name, description, sector_id, created_at, updated_at) VALUES (25, 'Renewables', 'Renewables', 13, '2025-07-19 11:14:34', '2025-07-19 11:14:34');
 INSERT INTO industry (id, name, description, sector_id, created_at, updated_at) VALUES (26, 'Transport Infrastructure', 'Transport Infrastructure', 15, '2025-07-19 11:14:34', '2025-07-19 11:14:34');
 INSERT INTO industry (id, name, description, sector_id, created_at, updated_at) VALUES (27, 'Wood & Wood Products', 'Wood & Wood Products', 5, '2025-07-19 11:14:34', '2025-07-19 11:14:34');
 INSERT INTO industry (id, name, description, sector_id, created_at, updated_at) VALUES (28, 'Electrodes & Welding Equipment', 'Electrodes & Welding Equipment', 8, '2025-07-19 11:14:34', '2025-07-19 11:14:34');

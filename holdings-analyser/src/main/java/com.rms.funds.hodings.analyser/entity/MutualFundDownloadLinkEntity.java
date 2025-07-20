@@ -5,35 +5,35 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "INDUSTRY")
+@Table(name = "MUTUAL_FUND_DOWNLOAD_LINKS")
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class IndustryEntity {
+public class MutualFundDownloadLinkEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    @Column(name = "MUTUAL_FUND_ID")
+    private Long mutualFundId;
 
-    private String description;
+    @OneToOne
+    //@PrimaryKeyJoinColumn
+    @JoinColumn(name = "MUTUAL_FUND_ID", insertable = false, updatable = false)
+    private MutualFundEntity mutualFund;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "sector_id", insertable = false, updatable = false)
-    private SectorEntity sectorEntity;
+    private String url;
 
-    @CreatedDate
+    private LocalDate atDate;
+
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
-
-    @LastModifiedDate
     private LocalDateTime updatedAt;
 }

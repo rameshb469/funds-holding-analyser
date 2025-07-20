@@ -9,5 +9,5 @@ import java.time.LocalDate;
 @Repository
 public interface MutualFundHoldingRepository extends JpaRepository<MutualFundHoldingEntity, Long> {
 
-    boolean isExistedBymMutualFundIdAndAtDate(Long mutualFundId, LocalDate atDate);
+    boolean existsByMutualFundIdAndAtDate(Long mutualFundId, LocalDate atDate);
 }

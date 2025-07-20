@@ -26,10 +26,12 @@ import java.util.stream.Collectors;
 
 import static com.rms.funds.hodings.analyser.utility.DateUtil.getDownloadLinks;
 
-@Component
+//@Component
 @RequiredArgsConstructor
 @Slf4j
-public class TestApp implements CommandLineRunner {
+public class TestApp
+      //  implements CommandLineRunner
+{
 
     private final MutualFundConfigRepository mutualFundConfigRepository;
     private final ExtractorJobRepository extractorJobRepository;
@@ -37,7 +39,7 @@ public class TestApp implements CommandLineRunner {
     private final FileDownloader fileDownloader;
 
 
-    @Override
+    //@Override
     public void run(String... args) throws Exception {
         Map<Long, List<MutualFundConfigEntity>> configEntitiesMap = mutualFundConfigRepository.findAll().stream()
                 .filter(x -> x.getMutualFund() != null)
@@ -109,12 +111,12 @@ public class TestApp implements CommandLineRunner {
 
             Result result = new Result();
             result.setName(getName(config));
-            result.setAtDate(atDate.format(DateTimeFormatter.ISO_LOCAL_DATE));
+           // result.setAtDate(atDate.format(DateTimeFormatter.ISO_LOCAL_DATE));
             result.setDownloadLink(link);
 
             try {
                 var list = extractFileUsingRest(getAttributes(link, config));
-                result.setCount(list.size());
+             //   result.setCount(list.size());
                 result.setStatus(Result.Status.SUCCESSFUL);
 
             } catch (Exception e) {
@@ -159,7 +161,7 @@ public class TestApp implements CommandLineRunner {
         Iterator<Result> it = emps.iterator();
         while (it.hasNext()) {
             Result emp = it.next();
-            records.add(new String[] { emp.getName(), emp.getDownloadLink(), emp.getAtDate(), emp.getCount()+"",  emp.getError(), emp.getStatus().name()});
+     //       records.add(new String[] { emp.getName(), emp.getDownloadLink(), emp.getAtDate(), emp.getCount()+"",  emp.getError(), emp.getStatus().name()});
         }
         return records;
     }

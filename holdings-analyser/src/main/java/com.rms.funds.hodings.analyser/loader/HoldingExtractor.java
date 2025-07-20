@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.concurrent.Callable;
 
 import static com.rms.funds.hodings.analyser.helper.MapperUtil.getAttributes;
@@ -19,22 +18,20 @@ import static com.rms.funds.hodings.analyser.helper.MapperUtil.getAttributes;
 public class HoldingExtractor implements Callable<Result> {
 
     private final FileDownloader fileDownloader;
-    private final Pair<String, LocalDate> downloadLinkPair;
+    private final String url;
+    private LocalDate atDate;
     private final MutualFundConfigEntity config;
-    private final Long mutualFundId;
 
     @Override
     public Result call() throws Exception {
-        String link = downloadLinkPair.getLeft();
-
-        LocalDate atDate = downloadLinkPair.getRight();
 
         Result result = new Result();
-        result.setMutualFundId(mutualFundId);
+        result.setConfigId(config.getId());
+      //  result.setMutualFundId(mutualFundId);
         result.setName(getFundName(config));
-        result.setAtDate(atDate.format(DateTimeFormatter.ISO_LOCAL_DATE));
-        result.setDownloadLink(link);
-        ExcelDownloaderAttributes attributes = getAttributes(link, config);
+        result.setAtDate(atDate);
+        result.setDownloadLink(url);
+        ExcelDownloaderAttributes attributes = getAttributes(url, config);
 
         try {
             var holdings =  fileDownloader.downloadExcelFile(attributes.getUrl(), attributes);
