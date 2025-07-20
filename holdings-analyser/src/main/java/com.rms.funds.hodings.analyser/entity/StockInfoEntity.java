@@ -39,10 +39,12 @@ public class StockInfoEntity {
     @Column(name = "FACE_VALUE")
     private Integer faceValue;
 
-    @ManyToOne
+    @OneToOne
+    @JoinColumn(name = "industry_id", insertable = false, updatable = false)
     private IndustryEntity industry;
 
-    @ManyToOne
+    @OneToOne
+    @JoinColumn(name = "sector_id", insertable = false, updatable = false)
     private SectorEntity sectorEntity;
 
     @Column(name = "ISIN_NUMBER")

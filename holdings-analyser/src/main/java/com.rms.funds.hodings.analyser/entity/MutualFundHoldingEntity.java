@@ -8,9 +8,10 @@ import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "MUTUAL_FUND_HOLDINGS")
+@Table(name = "MUTUAL_FUND_HOLDING")
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
@@ -27,7 +28,7 @@ public class MutualFundHoldingEntity {
     @OneToOne
     //@PrimaryKeyJoinColumn
     @JoinColumn(name = "MUTUAL_FUND_ID", insertable = false, updatable = false)
-    private MutualFundEntity houseEntity;
+    private MutualFundEntity mutualFund;
 
     @Column(name = "STOCK_ID")
     private Long stockId;
@@ -47,6 +48,7 @@ public class MutualFundHoldingEntity {
 
     private LocalDate atDate;
 
-    private Timestamp createdAt;
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
     private Timestamp updatedAt;
 }
