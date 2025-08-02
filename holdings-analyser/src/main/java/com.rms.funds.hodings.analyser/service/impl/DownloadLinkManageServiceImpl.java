@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -69,7 +70,7 @@ public class DownloadLinkManageServiceImpl implements DownloadLinkManageService 
                                                              LocalDate atDate,
                                                              String newUrl) {
         var linkEntity = linkRepository.findByMutualFundIdAndAtDate(mutualFund.getId(), atDate)
-                .map(link -> link.toBuilder().url(newUrl).build())
+                .map(link -> link.toBuilder().url(newUrl).updatedAt(LocalDateTime.now()).build())
                 .orElse(null);
         if (linkEntity == null) {
             linkEntity = MutualFundDownloadLinkEntity.builder()

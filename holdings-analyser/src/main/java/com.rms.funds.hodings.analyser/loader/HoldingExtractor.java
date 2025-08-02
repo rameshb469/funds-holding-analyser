@@ -18,20 +18,22 @@ import static com.rms.funds.hodings.analyser.helper.MapperUtil.getAttributes;
 public class HoldingExtractor implements Callable<Result> {
 
     private final FileDownloader fileDownloader;
-    private final String url;
-    private LocalDate atDate;
+    private final Pair<String, LocalDate> downloadLinkPair;
     private final MutualFundConfigEntity config;
 
     @Override
     public Result call() throws Exception {
+        String link = downloadLinkPair.getLeft();
+
+        LocalDate atDate = downloadLinkPair.getRight();
 
         Result result = new Result();
         result.setConfigId(config.getId());
       //  result.setMutualFundId(mutualFundId);
         result.setName(getFundName(config));
         result.setAtDate(atDate);
-        result.setDownloadLink(url);
-        ExcelDownloaderAttributes attributes = getAttributes(url, config);
+        result.setDownloadLink(link);
+        ExcelDownloaderAttributes attributes = getAttributes(link, config);
 
         try {
             var holdings =  fileDownloader.downloadExcelFile(attributes.getUrl(), attributes);
