@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 
 import static com.rms.funds.hodings.analyser.utility.DateUtil.getDownloadLinks;
 
-@Component
+//@Component
 @RequiredArgsConstructor
 public class StockInfoLoader implements CommandLineRunner {
 
@@ -49,10 +49,10 @@ public class StockInfoLoader implements CommandLineRunner {
         Map<Long, List<MutualFundConfigEntity>> configEntitiesMap = mutualFundConfigRepository.findAll().stream()
                 .filter(x -> x.getMutualFund() != null)
                 .filter(MutualFundConfigEntity::getIsActive)
-              //  .filter(x -> x.getMutualFund().getMutualFundHouseId().equals(1L))
+                .filter(x -> x.getMutualFund().getMutualFundHouseId().equals(1L))
                 .collect(Collectors.groupingBy(MutualFundConfigEntity::getMutualFundId));
 
-        ExecutorService executorService = Executors.newFixedThreadPool(10);
+        ExecutorService executorService = Executors.newFixedThreadPool(1);
 
         List<Future<Result>> futures = new ArrayList<>();
         for (var entry : configEntitiesMap.entrySet()){
@@ -88,43 +88,6 @@ public class StockInfoLoader implements CommandLineRunner {
         saveMutualFundHoldings(results);
     }
 
-    private void saveMutualFundHoldings() {
-
-        ExecutorService executorService = Executors.newFixedThreadPool(10);
-
-        List<Future<Result>> futures = new ArrayList<>();
-        for (var entry : configEntitiesMap.entrySet()){
-
-            List<MutualFundConfigEntity> configList = entry.getValue();
-
-            for (MutualFundConfigEntity config : configList) {
-                List<Pair<String, LocalDate>> downloadLinks = getDownloadLinks(config);
-
-                for (var downloadLinkPair : downloadLinks) {
-
-                    if (holdingRepository.existsByMutualFundIdAndAtDate(config.getMutualFundId(),  downloadLinkPair.getRight())) {
-                        log.info("Skipping Mutual fund job for {} mutual fund and {} date since its already existed", config.getMutualFundId(), downloadLinkPair.getRight());
-                    }
-                    futures.add(executorService.submit(new HoldingExtractor(fileDownloader, downloadLinkPair, config)));
-                }
-            }
-        }
-
-        // Collecting results
-        List<Result> results = new ArrayList<>();
-        for (Future<Result> future : futures) {
-            try {
-                results.add(future.get()); // Wait for task to complete
-            } catch (InterruptedException | ExecutionException e) {
-                log.error("Unable to process it.. ");
-            }
-        }
-
-        // Shutdown executor
-        executorService.shutdown();
-
-        saveMutualFundHoldings(results);
-    }
 
     private void saveMutualFundHoldings(List<Result> results) {
        // Set<String> missingCodes = new HashSet<>();
