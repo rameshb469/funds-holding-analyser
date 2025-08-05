@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.4.3'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'com.github.node-gradle.node' version '7.0.1' // ✅ Node plugin
 }
 
 group 'com.rms.projects'
@@ -59,3 +60,43 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+// ✅ Configure Node plugin (Node will be downloaded if not found)
+node {
+    version = '18.18.2'
+    npmVersion = '9.8.1'
+    download = true
+    workDir = file("${project.buildDir}/nodejs")
+    npmWorkDir = file("${project.buildDir}/npm")
+}
+def frontendDir = file("../frontend")
+
+// ✅ Use built-in npmInstall
+tasks.npmInstall {
+    workingDir = frontendDir
+}
+
+// ✅ Define npmBuild task
+tasks.register("npmBuild", com.github.gradle.node.npm.task.NpmTask) {
+    dependsOn tasks.npmInstall
+    workingDir = frontendDir
+    args = ["run", "build"]
+}
+
+// ✅ Clean static before copy
+tasks.register("cleanFrontend", Delete) {
+    delete "src/main/resources/static"
+}
+
+// ✅ Copy React build to Spring Boot static resources
+tasks.register("copyFrontendBuild", Copy) {
+    dependsOn("npmBuild")
+    from("${frontendDir}/dist")
+    into("src/main/resources/static")
+}
+
+// ✅ Ensure resources processing depends on copying React files
+tasks.named("processResources") {
+    dependsOn("copyFrontendBuild")
+}
+
