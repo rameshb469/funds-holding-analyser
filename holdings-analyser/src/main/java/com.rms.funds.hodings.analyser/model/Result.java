@@ -1,4 +1,4 @@
-package com.rms.funds.hodings.analyser.modal;
+package com.rms.funds.hodings.analyser.model;
 
 import lombok.*;
 

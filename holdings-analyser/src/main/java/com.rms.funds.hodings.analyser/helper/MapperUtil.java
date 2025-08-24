@@ -1,8 +1,8 @@
 package com.rms.funds.hodings.analyser.helper;
 
 import com.rms.funds.hodings.analyser.entity.MutualFundConfigEntity;
-import com.rms.funds.hodings.analyser.modal.ExcelDownloaderAttributes;
-import com.rms.funds.hodings.analyser.modal.SheetColumnMapper;
+import com.rms.funds.hodings.analyser.model.ExcelDownloaderAttributes;
+import com.rms.funds.hodings.analyser.model.SheetColumnMapper;
 
 public class MapperUtil {
 

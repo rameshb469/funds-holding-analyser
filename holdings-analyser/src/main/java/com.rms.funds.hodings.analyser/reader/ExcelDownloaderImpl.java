@@ -1,8 +1,8 @@
 package com.rms.funds.hodings.analyser.reader;
 
-import com.rms.funds.hodings.analyser.modal.ExcelDownloaderAttributes;
-import com.rms.funds.hodings.analyser.modal.MutualFundStockHolding;
-import com.rms.funds.hodings.analyser.modal.SheetColumnMapper;
+import com.rms.funds.hodings.analyser.model.ExcelDownloaderAttributes;
+import com.rms.funds.hodings.analyser.model.MutualFundStockHolding;
+import com.rms.funds.hodings.analyser.model.SheetColumnMapper;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;

@@ -54,4 +54,11 @@ public class ExtractorJobEntity {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
+    public String getError() {
+        if (this.error != null) {
+            return error.substring(0, Math.min(error.length(), 100));
+        }
+        return null;
+    }
+
 }

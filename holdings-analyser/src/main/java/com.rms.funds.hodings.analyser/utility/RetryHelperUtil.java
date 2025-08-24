@@ -1,6 +1,6 @@
 package com.rms.funds.hodings.analyser.utility;
 
-import com.rms.funds.hodings.analyser.modal.ExcelDownloaderAttributes;
+import com.rms.funds.hodings.analyser.model.ExcelDownloaderAttributes;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.HashMap;

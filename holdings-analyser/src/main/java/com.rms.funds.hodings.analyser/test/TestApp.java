@@ -2,24 +2,21 @@ package com.rms.funds.hodings.analyser.test;
 
 import com.opencsv.CSVWriter;
 import com.rms.funds.hodings.analyser.entity.MutualFundConfigEntity;
-import com.rms.funds.hodings.analyser.modal.ExcelDownloaderAttributes;
-import com.rms.funds.hodings.analyser.modal.MutualFundStockHolding;
-import com.rms.funds.hodings.analyser.modal.Result;
-import com.rms.funds.hodings.analyser.modal.SheetColumnMapper;
+import com.rms.funds.hodings.analyser.model.ExcelDownloaderAttributes;
+import com.rms.funds.hodings.analyser.model.MutualFundStockHolding;
+import com.rms.funds.hodings.analyser.model.Result;
+import com.rms.funds.hodings.analyser.model.SheetColumnMapper;
 import com.rms.funds.hodings.analyser.reader.FileDownloader;
 import com.rms.funds.hodings.analyser.repository.ExtractorJobRepository;
 import com.rms.funds.hodings.analyser.repository.MutualFundConfigRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.stereotype.Component;
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
