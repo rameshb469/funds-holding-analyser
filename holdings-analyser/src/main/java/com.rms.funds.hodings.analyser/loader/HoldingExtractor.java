@@ -1,8 +1,8 @@
 package com.rms.funds.hodings.analyser.loader;
 
 import com.rms.funds.hodings.analyser.entity.MutualFundConfigEntity;
-import com.rms.funds.hodings.analyser.modal.ExcelDownloaderAttributes;
-import com.rms.funds.hodings.analyser.modal.Result;
+import com.rms.funds.hodings.analyser.model.ExcelDownloaderAttributes;
+import com.rms.funds.hodings.analyser.model.Result;
 import com.rms.funds.hodings.analyser.reader.FileDownloader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,7 +1,7 @@
 package com.rms.funds.hodings.analyser.reader;
 
-import com.rms.funds.hodings.analyser.modal.ExcelDownloaderAttributes;
-import com.rms.funds.hodings.analyser.modal.MutualFundStockHolding;
+import com.rms.funds.hodings.analyser.model.ExcelDownloaderAttributes;
+import com.rms.funds.hodings.analyser.model.MutualFundStockHolding;
 
 import java.net.URISyntaxException;
 import java.util.List;
