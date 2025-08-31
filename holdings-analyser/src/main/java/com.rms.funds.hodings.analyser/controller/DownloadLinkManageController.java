@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(value = "/api/mf-download-url")
 @RequiredArgsConstructor
+@CrossOrigin("*")
 public class DownloadLinkManageController {
 
     private final DownloadLinkManageService service;

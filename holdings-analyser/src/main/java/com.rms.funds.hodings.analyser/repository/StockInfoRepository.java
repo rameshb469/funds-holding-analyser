@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface StockInfoRepository extends JpaRepository<StockInfoEntity, Long> {
 
     Optional<StockInfoEntity> findByIsinNumber(String isinNumber);
+    Optional<StockInfoEntity> findBySymbol(String symbol);
 }

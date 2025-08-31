@@ -38,7 +38,7 @@ public class FilterAttributeServiceImpl implements FilterAttributeService {
                 .fundNames(getAttributes(cachedFilterAttributes.getFundNames(), filterCriteria.getMfNames(),
                         Map.of("type", filterCriteria.getFundTypes())))
                 .stockInfo(getAttributes(cachedFilterAttributes.getStockInfo(), filterCriteria.getStocks(),
-                        Collections.emptyMap()))
+                        Map.of("sector", filterCriteria.getSectors(), "industry", filterCriteria.getIndustries())))
                 .build();
     }
 
@@ -92,6 +92,10 @@ public class FilterAttributeServiceImpl implements FilterAttributeService {
                         .id(stock.getId().toString())
                         .name(stock.getCompany())
                         .description(stock.getSymbol())
+                        .metaInfo(Map.of(
+                                "sector", stock.getSectorEntity().getId()+"",
+                                "industry", stock.getIndustry().getId()+"" )
+                                )
                         .build()).toList())
                 .build();
     }

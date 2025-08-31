@@ -13,7 +13,7 @@ export default function Header() {
 
   const navLinks = [
     { name: "Dashboard", path: "/" },
-    { name: "StockView", path: "/StockView" },
+    { name: "StockView", path: "/stocks/678" },
     { name: "Configurations", path: "/reports/configuration" },
     { name: "Download Report", path: "/reports/download-urls" }
     // {

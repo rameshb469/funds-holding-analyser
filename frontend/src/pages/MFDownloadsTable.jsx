@@ -1,34 +1,67 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 
-// ---- dummy data ----
-const initialRows = [
-  { id: 1, fund: "SBI Bluechip Fund", url: "https://example.com/sbi.xlsx", date: "2025-06-30", status: "SUCCESS", error: "", count: 1200 },
-  { id: 2, fund: "Mirae Largecap Fund", url: "https://example.com/mirae.xlsx", date: "2025-06-30", status: "FAILED",  error: "File not found", count: 0 },
-  { id: 3, fund: "Axis Bluechip Fund",  url: "https://example.com/axis.xlsx",  date: "2025-05-31", status: "PARTIAL", error: "Some rows skipped", count: 450 },
-  { id: 4, fund: "Canara Robeco Flexi", url: "https://example.com/canara.xlsx",date: "2025-06-30", status: "FAILED",  error: "", count: 980 },
-];
-
-// format yyyy-MM-dd -> dd-MM-YYYY without Date()
 function formatDMY(s) { if (!s) return ""; const [y,m,d]=s.split("-"); return `${d}-${m}-${y}`; }
 function isValidUrl(s){ try{const u=new URL(s); return u.protocol==="http:"||u.protocol==="https:";}catch{return false;} }
 function cn(...c){ return c.filter(Boolean).join(" "); }
 
 const MFDownloadsTable = () => {
-  const [rows, setRows] = useState(initialRows);
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState([]);
   const [accordionOpen, setAccordionOpen] = useState(false);
   const [editMap, setEditMap] = useState({});
   const [applyAllValue, setApplyAllValue] = useState("");
+  const [sortConfig, setSortConfig] = useState({ key: "date", direction: "desc" });
 
-  // filters (optional)
+  // pagination
+  const [pageSize, setPageSize] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // filters
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [fundFilter, setFundFilter] = useState("");
 
-  const fundOptions = useMemo(
-    () => Array.from(new Set(rows.map(r=>r.fund))).sort(),
-    [rows]
-  );
+  // Fetch API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch("http://localhost:8080/api/mf-extractor-info");
+        const data = await res.json();
+        const mapped = data.map(item => ({
+          id: item.id,
+          fund: item.mutualFundName,
+          mutualFundId: item.mutualFundId,
+          url: item.url,
+          date: item.atDate,
+          status: item.status,
+          error: item.error,
+          count: item.recordCount ?? 0,
+        }));
+        setRows(mapped);
+      } catch (e) {
+        console.error("Failed to fetch:", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
+  // Summary stats
+  const summary = useMemo(() => {
+    const uniqueFunds = new Set(rows.map(r => r.mutualFundId)).size;
+    const totalStocks = rows.length;
+    const successCount = rows.filter(r => r.status === "SUCCESSFUL").length;
+    const failedCount = rows.filter(r => r.status === "FAILED").length;
+    return { uniqueFunds, totalStocks, successCount, failedCount };
+  }, [rows]);
+
+  const statusOptions = useMemo(() => {
+    const unique = Array.from(new Set(rows.map(r => r.status))).filter(Boolean).sort();
+    return ["ALL", ...unique];
+  }, [rows]);
+
+  // Filtering
   const filteredRows = useMemo(() => {
     return rows.filter((r) => {
       const byStatus = statusFilter === "ALL" || r.status === statusFilter;
@@ -37,16 +70,46 @@ const MFDownloadsTable = () => {
     });
   }, [rows, statusFilter, fundFilter]);
 
-  // Only rows that are NOT SUCCESS can be selected
-  const selectableVisible = filteredRows.filter(r => r.status !== "SUCCESS");
+  // Sorting
+  const sortedRows = useMemo(() => {
+    if (!sortConfig.key) return filteredRows;
+    const sorted = [...filteredRows].sort((a, b) => {
+      const valA = a[sortConfig.key];
+      const valB = b[sortConfig.key];
+      if (valA < valB) return sortConfig.direction === "asc" ? -1 : 1;
+      if (valA > valB) return sortConfig.direction === "asc" ? 1 : -1;
+      return 0;
+    });
+    return sorted;
+  }, [filteredRows, sortConfig]);
+
+  const requestSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        return { key, direction: prev.direction === "asc" ? "desc" : "asc" };
+      }
+      return { key, direction: "asc" };
+    });
+  };
+
+  // Pagination logic
+  const totalPages = Math.ceil(sortedRows.length / pageSize) || 1;
+  const pagedRows = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return sortedRows.slice(start, start + pageSize);
+  }, [sortedRows, currentPage, pageSize]);
+
+  useEffect(() => { setCurrentPage(1); }, [pageSize, statusFilter, fundFilter]);
+
+  // Selection logic
+  const selectableVisible = pagedRows.filter(r => r.status !== "SUCCESSFUL");
   const allVisibleSelected =
     selectableVisible.length > 0 &&
     selectableVisible.every((r) => selectedIds.includes(r.id));
 
-  // --- selection handlers ensuring SUCCESS is not selectable ---
   const toggleSelectOne = (id) => {
     const row = rows.find(r => r.id === id);
-    if (!row || row.status === "SUCCESS") return; // block selection
+    if (!row || row.status === "SUCCESSFUL") return;
     setSelectedIds(prev => prev.includes(id) ? prev.filter(x=>x!==id) : [...prev,id]);
   };
 
@@ -62,7 +125,7 @@ const MFDownloadsTable = () => {
 
   const clearSelection = () => setSelectedIds([]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (selectedIds.length > 0) {
       setAccordionOpen(true);
       setEditMap(prev => {
@@ -100,17 +163,51 @@ const MFDownloadsTable = () => {
     }));
   };
 
-  const handleSave = () => {
-    for (const id of selectedIds) {
-      const e = editMap[id];
-      if (!e || !e.url || e.error) return alert("Please fix invalid or empty URLs before saving.");
-    }
-    setRows(prev => prev.map(r => selectedIds.includes(r.id) ? { ...r, url: editMap[r.id].url } : r));
-    setAccordionOpen(false);
-    setEditMap({});
-    setApplyAllValue("");
-    clearSelection();
-  };
+ const handleSave = async () => {
+   for (const id of selectedIds) {
+     const e = editMap[id];
+     if (!e || !e.url || e.error) {
+       return alert("Please fix invalid or empty URLs before saving.");
+     }
+   }
+
+   // Build request body
+   const updatedLinks = {};
+   selectedIds.forEach(id => {
+     updatedLinks[id] = editMap[id].url;
+   });
+
+   try {
+     const res = await fetch("http://localhost:8080/api/mf-extractor-info", {
+       method: "POST",
+       headers: { "Content-Type": "application/json" },
+       body: JSON.stringify({ updatedLinks }),
+     });
+
+     if (!res.ok) {
+       throw new Error("Failed to update links");
+     }
+
+     // Optionally re-fetch rows after update
+     const updated = await res.json();
+     console.log("Update response:", updated);
+
+     setRows(prev =>
+       prev.map(r =>
+         selectedIds.includes(r.id) ? { ...r, url: editMap[r.id].url } : r
+       )
+     );
+
+     setAccordionOpen(false);
+     setEditMap({});
+     setApplyAllValue("");
+     clearSelection();
+     alert("Links updated successfully!");
+   } catch (err) {
+     console.error(err);
+     alert("Error updating links: " + err.message);
+   }
+ };
 
   const handleCancel = () => {
     setAccordionOpen(false);
@@ -119,9 +216,33 @@ const MFDownloadsTable = () => {
     clearSelection();
   };
 
+  if (loading) {
+    return <div className="p-6 text-gray-500">Loading...</div>;
+  }
+
   return (
-    <div className="space-y-3">
-      {/* Filters (optional) */}
+    <div className="space-y-4">
+      {/* Summary cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="p-4 bg-white rounded-lg shadow border text-center">
+          <p className="text-xs text-gray-500 uppercase">No. of Mutual Funds</p>
+          <p className="mt-1 text-2xl font-semibold">{summary.uniqueFunds}</p>
+        </div>
+        <div className="p-4 bg-white rounded-lg shadow border text-center">
+          <p className="text-xs text-gray-500 uppercase">No. of Stocks</p>
+          <p className="mt-1 text-2xl font-semibold">{summary.totalStocks}</p>
+        </div>
+        <div className="p-4 bg-white rounded-lg shadow border text-center">
+          <p className="text-xs text-gray-500 uppercase">Successful Count</p>
+          <p className="mt-1 text-2xl font-semibold text-green-600">{summary.successCount}</p>
+        </div>
+        <div className="p-4 bg-white rounded-lg shadow border text-center">
+          <p className="text-xs text-gray-500 uppercase">Failed Count</p>
+          <p className="mt-1 text-2xl font-semibold text-red-600">{summary.failedCount}</p>
+        </div>
+      </div>
+
+      {/* Filters */}
       <div className="flex flex-col md:flex-row gap-3 md:items-end justify-between">
         <div className="flex flex-wrap gap-3">
           <div>
@@ -131,10 +252,7 @@ const MFDownloadsTable = () => {
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
-              <option value="ALL">All</option>
-              <option value="SUCCESS">Success</option>
-              <option value="FAILED">Failed</option>
-              <option value="PARTIAL">Partial</option>
+              {statusOptions.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
 
@@ -148,7 +266,7 @@ const MFDownloadsTable = () => {
               onChange={(e) => setFundFilter(e.target.value)}
             />
             <datalist id="fundList">
-              {fundOptions.map((f) => <option key={f} value={f} />)}
+              {Array.from(new Set(rows.map(r => r.fund))).sort().map((f) => <option key={f} value={f} />)}
             </datalist>
           </div>
         </div>
@@ -175,25 +293,32 @@ const MFDownloadsTable = () => {
           <thead className="bg-gray-100 text-gray-700">
             <tr>
               <th className="p-3 w-10">
-                {/* Select All only targets NON-SUCCESS rows */}
                 <input
                   type="checkbox"
                   checked={selectableVisible.length>0 && allVisibleSelected}
                   onChange={toggleSelectAllVisible}
                 />
               </th>
-              <th className="p-3 text-left">Mutual Fund Name</th>
-              <th className="p-3 text-left">Download URL</th>
-              <th className="p-3 text-left">Date (dd-MM-YYYY)</th>
-              <th className="p-3 text-left">Status</th>
-              <th className="p-3 text-left">Error</th>
-              <th className="p-3 text-right">Record Count</th>
+              {["fund","url","date","status","error","count"].map((col) => (
+                <th
+                  key={col}
+                  className="p-3 text-left cursor-pointer select-none"
+                  onClick={() => requestSort(col)}
+                >
+                  {col === "fund" ? "Mutual Fund Name" :
+                   col === "url" ? "Download URL" :
+                   col === "date" ? "Date (dd-MM-YYYY)" :
+                   col === "status" ? "Status" :
+                   col === "error" ? "Error" : "Record Count"}
+                  {sortConfig.key === col ? (sortConfig.direction === "asc" ? " ▲" : " ▼") : ""}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
-            {filteredRows.map((r) => {
+            {pagedRows.map((r) => {
               const selected = selectedIds.includes(r.id);
-              const unselectable = r.status === "SUCCESS"; // <-- cannot select
+              const unselectable = r.status === "SUCCESSFUL";
               return (
                 <tr key={r.id} className={selected ? "bg-blue-50" : "hover:bg-gray-50"}>
                   <td className="p-3">
@@ -201,7 +326,7 @@ const MFDownloadsTable = () => {
                       type="checkbox"
                       checked={selected}
                       disabled={unselectable}
-                      title={unselectable ? "SUCCESS rows cannot be edited" : ""}
+                      title={unselectable ? "SUCCESSFUL rows cannot be edited" : ""}
                       onChange={() => toggleSelectOne(r.id)}
                     />
                   </td>
@@ -215,7 +340,7 @@ const MFDownloadsTable = () => {
                   <td className="p-3">
                     <span
                       className={
-                        r.status === "SUCCESS"
+                        r.status === "SUCCESSFUL"
                           ? "text-green-700"
                           : r.status === "FAILED"
                           ? "text-red-600"
@@ -231,7 +356,7 @@ const MFDownloadsTable = () => {
               );
             })}
 
-            {filteredRows.length === 0 && (
+            {pagedRows.length === 0 && (
               <tr>
                 <td className="p-6 text-center text-gray-500 italic" colSpan={7}>
                   No results with current filters.
@@ -240,6 +365,42 @@ const MFDownloadsTable = () => {
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Pagination controls */}
+      <div className="flex justify-between items-center mt-3">
+        <div className="flex items-center gap-2 text-sm">
+          <span>Rows per page:</span>
+          <select
+            className="border rounded px-2 py-1 text-sm"
+            value={pageSize}
+            onChange={(e) => setPageSize(Number(e.target.value))}
+          >
+            {[5,10,20,50].map(size => (
+              <option key={size} value={size}>{size}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex items-center gap-2 text-sm">
+          <button
+            className="px-2 py-1 border rounded disabled:opacity-50"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(p => Math.max(p-1, 1))}
+          >
+            Prev
+          </button>
+          <span>
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            className="px-2 py-1 border rounded disabled:opacity-50"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage(p => Math.min(p+1, totalPages))}
+          >
+            Next
+          </button>
+        </div>
       </div>
 
       {/* Accordion */}
@@ -255,7 +416,6 @@ const MFDownloadsTable = () => {
 
         {accordionOpen && selectedIds.length > 0 && (
           <div className="border rounded-b-md border-t-0 p-4 bg-white shadow-sm">
-            {/* Apply to all */}
             <div className="flex flex-col md:flex-row gap-3 items-start md:items-end mb-4">
               <div className="flex-1">
                 <label className="block text-xs text-gray-600 mb-1">Set one URL for all selected</label>
@@ -271,14 +431,13 @@ const MFDownloadsTable = () => {
               </button>
             </div>
 
-            {/* Per-row editors — replaced Status with Date */}
             <div className="max-h-72 overflow-auto border rounded">
               <table className="w-full text-sm">
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="p-2 text-left w-48">Fund</th>
                     <th className="p-2 text-left">New Download URL</th>
-                    <th className="p-2 text-left w-40">Date (dd-MM-YYYY)</th> {/* <-- Date column */}
+                    <th className="p-2 text-left w-40">Date (dd-MM-YYYY)</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -297,7 +456,7 @@ const MFDownloadsTable = () => {
                           />
                           {edit.error && <p className="text-xs text-red-600 mt-1">{edit.error}</p>}
                         </td>
-                        <td className="p-2">{formatDMY(row?.date)}</td> {/* read-only date display */}
+                        <td className="p-2">{formatDMY(row?.date)}</td>
                       </tr>
                     );
                   })}
@@ -320,7 +479,7 @@ const MFDownloadsTable = () => {
   );
 }
 
-/* small helpers */
+/* helpers */
 function accordionBtnClass(enabled, open) {
   return cn(
     "w-full flex items-center justify-between px-4 py-2 rounded-md border text-sm",
