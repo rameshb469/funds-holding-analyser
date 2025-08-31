@@ -107,4 +107,20 @@ public class MutualFundConfigEntity {
                 .orElse(null);
     }
 
+    @JsonIgnore
+    public MutualFundHouseEntity getFundHouse() {
+        return Optional.of(this)
+                .map(MutualFundConfigEntity::getMutualFund)
+                .map(MutualFundEntity::getHouseEntity)
+                .orElse(null);
+    }
+
+    @JsonIgnore
+    public MutualFundTypeEntity getFundType() {
+        return Optional.of(this)
+                .map(MutualFundConfigEntity::getMutualFund)
+                .map(MutualFundEntity::getTypeEntity)
+                .orElse(null);
+    }
+
 }

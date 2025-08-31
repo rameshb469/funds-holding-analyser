@@ -106,5 +106,17 @@ public class StockInfoHolder {
         groupByIsinNumber.put("INE476A01022", groupByIsinNumber.get("INE476A01014"));
         //INE949H13010--> INE949H01023
         groupByIsinNumber.put("INE949H13010", groupByIsinNumber.get("INE949H01023"));
+
+        //INE324A01024 --> INE324A01032
+        groupByIsinNumber.put("INE324A01032", groupByIsinNumber.get("INE324A01024"));
+        //INE591G01017 ---> INE591G01025
+        groupByIsinNumber.put("INE591G01025", groupByIsinNumber.get("INE591G01017"));
+
+        // INE085J01014 --> INE085J20014
+        groupByIsinNumber.put("INE085J20014", groupByIsinNumber.get("INE085J01014"));
+
+        //INE774D01024 --> INE774D20024
+        groupByIsinNumber.put("INE774D20024", groupByIsinNumber.get("INE774D01024"));
+
     }
 }

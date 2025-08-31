@@ -10,7 +10,7 @@ function App() {
     <Routes>
       <Route path="/">
         <Route index element={<Dashboard />} />
-        <Route path="/StockView" element={<StockView />} />
+         <Route path="/stocks/:stockId" element={<StockView />} />
         <Route path='/reports/configuration' element={<Reports />} />
         <Route path='/reports/download-urls' element={<DownloadUrlReport/>} />
         <Route path="*" element={<NotFound />} />

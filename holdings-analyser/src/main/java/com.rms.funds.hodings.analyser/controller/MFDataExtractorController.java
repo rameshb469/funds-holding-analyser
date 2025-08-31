@@ -11,6 +11,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(value = "/api/mf-extractor-info")
+@CrossOrigin("*")
 public class MFDataExtractorController {
 
     private final ExtractorJobService extractorJobService;

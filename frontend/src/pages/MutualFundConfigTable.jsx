@@ -1,246 +1,191 @@
-import React, { useState } from "react";
-
-const fundHouseOptions = ["SBI Mutual Fund", "Mirae Asset", "Axis MF", "HDFC MF"];
-const fundNameOptions = ["Bluechip Fund", "Largecap Fund", "Flexicap Fund", "Midcap Fund"];
-const fundTypeOptions = ["Equity", "Debt", "Hybrid", "Index"];
-
-const initialData = [
-  {
-    house: "SBI Mutual Fund",
-    name: "SBI Bluechip Fund",
-    type: "Equity",
-    configUrl: "https://example.com/sbi-bluechip",
-    mapper1: "YYYY/MM",
-    mapper2: "M+1",
-    mapper3: "Active",
-    mapper4: "Valid",
-    success: 12,
-    failed: 1,
-  },
-];
+import React, { useEffect, useMemo, useState } from "react";
 
 const MutualFundConfigTable = () => {
-  const [data, setData] = useState(initialData);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState(null);
-  const [formData, setFormData] = useState({});
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const openAddModal = () => {
-    setFormData({});
-    setShowAddModal(true);
-  };
+  // filters
+  const [houseFilter, setHouseFilter] = useState("ALL");
+  const [fundFilter, setFundFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState("ALL");
 
-  const openEditModal = (index) => {
-    setSelectedIndex(index);
-    setFormData(data[index]);
-    setShowEditModal(true);
-  };
+  // pagination
+  const [pageSize, setPageSize] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const openDeleteModal = (index) => {
-    setSelectedIndex(index);
-    setShowDeleteModal(true);
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch("http://localhost:8080/api/mf-configs");
+        const data = await res.json();
+        const mapped = Array.isArray(data) ? data.map(item => ({
+          id: item.id,
+          mfHouseName: item.mfHouseName ?? "-",
+          mutualFundName: item.mutualFundName ?? "-",
+          mfTypeName: item.mfTypeName ?? "-",
+          configUrl: item.configUrl,
+          sheetName: item.sheetName ?? "",
+          dateMapper1: item.dateMapper1,
+          dateMapper2: item.dateMapper2,
+          dateMapper3: item.dateMapper3,
+          dateMapper4: item.dateMapper4,
+          successfulCount: item.successfulCount,
+          failedCount: item.failedCount
+        })) : [];
+        setRows(mapped);
+      } catch (err) {
+        console.error("Error fetching configs:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
-  const closeModals = () => {
-    setShowAddModal(false);
-    setShowEditModal(false);
-    setShowDeleteModal(false);
-  };
+  // unique filter options
+  const houseOptions = useMemo(() => ["ALL", ...new Set(rows.map(r => r.mfHouseName).filter(Boolean))], [rows]);
+  const typeOptions = useMemo(() => ["ALL", ...new Set(rows.map(r => r.mfTypeName).filter(Boolean))], [rows]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  // filtering
+  const filteredRows = useMemo(() => {
+    return rows.filter(r => {
+      const byHouse = houseFilter === "ALL" || r.mfHouseName === houseFilter;
+      const byFund = !fundFilter || r.mutualFundName.toLowerCase().includes(fundFilter.toLowerCase());
+      const byType = typeFilter === "ALL" || r.mfTypeName === typeFilter;
+      return byHouse && byFund && byType;
+    });
+  }, [rows, houseFilter, fundFilter, typeFilter]);
 
-  const handleAdd = () => {
-    if (!formData.house || !formData.name || !formData.type) return;
-    const fullName = `${formData.house.split(" ")[0]} ${formData.name}`;
-    setData((prev) => [...prev, { ...formData, name: fullName, success: 0, failed: 0 }]);
-    closeModals();
-  };
+  // pagination
+  const totalPages = Math.ceil(filteredRows.length / pageSize) || 1;
+  const pagedRows = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredRows.slice(start, start + pageSize);
+  }, [filteredRows, currentPage, pageSize]);
 
-  const handleEdit = () => {
-    const updated = [...data];
-    updated[selectedIndex] = { ...updated[selectedIndex], ...formData };
-    setData(updated);
-    closeModals();
-  };
+  useEffect(() => { setCurrentPage(1); }, [pageSize, houseFilter, fundFilter, typeFilter]);
 
-  const handleDelete = () => {
-    const updated = [...data];
-    updated.splice(selectedIndex, 1);
-    setData(updated);
-    closeModals();
-  };
+  if (loading) {
+    return <div className="p-6 text-gray-500">Loading...</div>;
+  }
 
   return (
-    <div className="relative p-4">
-      <div className="flex justify-end mb-2">
-        <button
-          onClick={openAddModal}
-          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-        >
-          Add Configuration
-        </button>
+    <div className="relative p-4 space-y-4">
+      {/* Filters */}
+      <div className="flex flex-wrap gap-3 items-end">
+        <div>
+          <label className="block text-xs text-gray-600 mb-1">Fund House</label>
+          <select
+            value={houseFilter}
+            onChange={(e) => setHouseFilter(e.target.value)}
+            className="border rounded px-3 py-2 text-sm"
+          >
+            {houseOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-xs text-gray-600 mb-1">Fund Name</label>
+          <input
+            type="text"
+            value={fundFilter}
+            onChange={(e) => setFundFilter(e.target.value)}
+            placeholder="Search Fund Name"
+            className="border rounded px-3 py-2 text-sm"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs text-gray-600 mb-1">Type</label>
+          <select
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+            className="border rounded px-3 py-2 text-sm"
+          >
+            {typeOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+          </select>
+        </div>
       </div>
 
-      <table className="min-w-full table-auto border-collapse border border-gray-300">
-        <thead>
-          <tr className="bg-gray-100 text-left">
-            <th className="p-2 border">Mutual Fund House</th>
-            <th className="p-2 border">MF Name</th>
-            <th className="p-2 border">Type of MF</th>
-            <th className="p-2 border">Configuration URL</th>
-            <th className="p-2 border">Data Mapper 1</th>
-            <th className="p-2 border">Data Mapper 2</th>
-            <th className="p-2 border">Data Mapper 3</th>
-            <th className="p-2 border">Data Mapper 4</th>
-            <th className="p-2 border">Success Count</th>
-            <th className="p-2 border">Failed Count</th>
-            <th className="p-2 border">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((fund, idx) => (
-            <tr key={idx} className="hover:bg-gray-50">
-              <td className="p-2 border">{fund.house}</td>
-              <td className="p-2 border">{fund.name}</td>
-              <td className="p-2 border">{fund.type}</td>
-              <td className="p-2 border">
-                <a href={fund.configUrl} className="text-blue-600" target="_blank" rel="noreferrer">
-                  Link
-                </a>
-              </td>
-              <td className="p-2 border">{fund.mapper1}</td>
-              <td className="p-2 border">{fund.mapper2}</td>
-              <td className="p-2 border">{fund.mapper3}</td>
-              <td className="p-2 border">{fund.mapper4}</td>
-              <td className="p-2 border text-green-600">{fund.success}</td>
-              <td className="p-2 border text-red-500">{fund.failed}</td>
-              <td className="p-2 border space-x-2">
-                <button onClick={() => openEditModal(idx)} className="text-blue-500">Edit</button>
-                <button onClick={() => openDeleteModal(idx)} className="text-red-500">Delete</button>
-              </td>
+      {/* Table */}
+      <div className="overflow-x-auto bg-white rounded shadow border">
+        <table className="min-w-full text-sm">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="p-2 border">Mutual Fund House</th>
+              <th className="p-2 border">Mutual Fund Name</th>
+              <th className="p-2 border">MF Type</th>
+              <th className="p-2 border">Config URL</th>
+              <th className="p-2 border">Sheet Name</th>
+              <th className="p-2 border">Date Mapper 1</th>
+              <th className="p-2 border">Date Mapper 2</th>
+              <th className="p-2 border">Date Mapper 3</th>
+              <th className="p-2 border">Date Mapper 4</th>
+              <th className="p-2 border">Success Count</th>
+              <th className="p-2 border">Failed Count</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {pagedRows.map(r => (
+              <tr key={r.id} className="hover:bg-gray-50">
+                <td className="p-2 border">{r.mfHouseName}</td>
+                <td className="p-2 border">{r.mutualFundName}</td>
+                <td className="p-2 border">{r.mfTypeName}</td>
+                <td className="p-2 border">{r.configUrl} </td>
+                <td className="p-2 border">{r.sheetName}</td>
+                <td className="p-2 border">{r.dateMapper1}</td>
+                <td className="p-2 border">{r.dateMapper2}</td>
+                <td className="p-2 border">{r.dateMapper3}</td>
+                <td className="p-2 border">{r.dateMapper4}</td>
+                <td className="p-2 border text-green-600">{r.successfulCount}</td>
+                <td className="p-2 border text-red-500">{r.failedCount}</td>
+              </tr>
+            ))}
+            {pagedRows.length === 0 && (
+              <tr>
+                <td className="p-4 text-center text-gray-500 italic" colSpan={11}>
+                  No results with current filters.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
 
-      {/* Modal Reusable */}
-      {(showAddModal || showEditModal) && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded shadow-lg w-full max-w-lg">
-            <h2 className="text-lg font-semibold mb-4">
-              {showAddModal ? "Add Configuration" : "Edit Configuration"}
-            </h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm">Fund House</label>
-                <select
-                  name="house"
-                  value={formData.house || ""}
-                  onChange={handleChange}
-                  className="w-full border px-2 py-1 rounded"
-                  disabled={showEditModal}
-                >
-                  <option value="">Select House</option>
-                  {fundHouseOptions.map((opt) => (
-                    <option key={opt} value={opt}>{opt}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm">Fund Name</label>
-                <select
-                  name="name"
-                  value={formData.name || ""}
-                  onChange={handleChange}
-                  className="w-full border px-2 py-1 rounded"
-                  disabled={showEditModal}
-                >
-                  <option value="">Select Name</option>
-                  {fundNameOptions.map((opt) => (
-                    <option key={opt} value={opt}>{opt}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm">Type</label>
-                <select
-                  name="type"
-                  value={formData.type || ""}
-                  onChange={handleChange}
-                  className="w-full border px-2 py-1 rounded"
-                  disabled={showEditModal}
-                >
-                  <option value="">Select Type</option>
-                  {fundTypeOptions.map((opt) => (
-                    <option key={opt} value={opt}>{opt}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm">Config URL</label>
-                <input
-                  name="configUrl"
-                  value={formData.configUrl || ""}
-                  onChange={handleChange}
-                  className="w-full border px-2 py-1 rounded"
-                />
-              </div>
-              {["mapper1", "mapper2", "mapper3", "mapper4"].map((field) => (
-                <div key={field}>
-                  <label className="block text-sm">{field.replace("mapper", "Data Mapper ")}</label>
-                  <input
-                    name={field}
-                    value={formData[field] || ""}
-                    onChange={handleChange}
-                    className="w-full border px-2 py-1 rounded"
-                  />
-                </div>
-              ))}
-            </div>
-            <div className="flex justify-end gap-3 mt-6">
-              <button onClick={closeModals} className="px-4 py-2 bg-gray-100 rounded hover:bg-gray-200">
-                Cancel
-              </button>
-              <button
-                onClick={showAddModal ? handleAdd : handleEdit}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-              >
-                {showAddModal ? "Add" : "Update"}
-              </button>
-            </div>
-          </div>
+      {/* Pagination */}
+      <div className="flex justify-between items-center mt-3">
+        <div className="flex items-center gap-2 text-sm">
+          <span>Rows per page:</span>
+          <select
+            className="border rounded px-2 py-1 text-sm"
+            value={pageSize}
+            onChange={(e) => setPageSize(Number(e.target.value))}
+          >
+            {[5, 10, 20, 50].map(size => (
+              <option key={size} value={size}>{size}</option>
+            ))}
+          </select>
         </div>
-      )}
-
-      {/* Delete Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded shadow-md w-full max-w-sm">
-            <p className="text-gray-700 mb-4">Are you sure you want to delete this configuration?</p>
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={closeModals}
-                className="px-4 py-2 bg-gray-100 rounded hover:bg-gray-200"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDelete}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
+        <div className="flex items-center gap-2 text-sm">
+          <button
+            className="px-2 py-1 border rounded disabled:opacity-50"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+          >
+            Prev
+          </button>
+          <span>Page {currentPage} of {totalPages}</span>
+          <button
+            className="px-2 py-1 border rounded disabled:opacity-50"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+          >
+            Next
+          </button>
         </div>
-      )}
+      </div>
     </div>
   );
-}
+};
 
 export default MutualFundConfigTable;

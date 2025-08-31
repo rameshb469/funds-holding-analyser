@@ -19,6 +19,7 @@ const FilterSidebar = ({ isOpen, onClose, onFilterChange }) => {
 
   const [industryOptions, setIndustryOptions] = useState([]);
   const [fundNameOptions, setFundNameOptions] = useState([]);
+  const [stockOptions, setStockOptions] = useState([]);
 
   // Fetch filters from API
   useEffect(() => {
@@ -27,18 +28,23 @@ const FilterSidebar = ({ isOpen, onClose, onFilterChange }) => {
         const res = await fetch("http://localhost:8080/api/mf-filters");
         const data = await res.json();
 
+        const stocks = data.stockInfo?.map(st => ({
+          value: st.id,
+          label: `${st.name} (${st.description})`,
+          name: st.name,
+          symbol: st.description,
+          metaInfo: st.metaInfo
+        })) || [];
+
         setFilters({
           sector: data.sectors?.map(s => ({ value: s.id, label: s.description })) || [],
           industry: data.industry?.map(i => ({ value: i.id, label: i.description, metaInfo: i.metaInfo })) || [],
           fundType: data.fundTypes?.map(f => ({ value: f.id, label: f.description })) || [],
           mfName: data.fundNames?.map(m => ({ value: m.id, label: m.name, metaInfo: m.metaInfo })) || [],
-          stockInfo: data.stockInfo?.map(st => ({
-            value: st.id,
-            label: `${st.name} (${st.description})`, // name + symbol
-            name: st.name,
-            symbol: st.description
-          })) || []
+          stockInfo: stocks
         });
+
+        setStockOptions(stocks); // ✅ default all stocks
       } catch (err) {
         console.error("Failed to fetch filters", err);
       }
@@ -47,28 +53,49 @@ const FilterSidebar = ({ isOpen, onClose, onFilterChange }) => {
     fetchFilters();
   }, []);
 
-  // Update industries when sector changes
+  // Update industries & stocks when sector changes
   useEffect(() => {
     if (selectedSector) {
       setIndustryOptions(
-        filters.industry.filter(i => i.metaInfo?.sector === selectedSector.value)
+        filters.industry.filter(i => String(i.metaInfo?.sector) === String(selectedSector.value))
+      );
+      setStockOptions(
+        filters.stockInfo.filter(st => String(st.metaInfo?.sector) === String(selectedSector.value))
       );
     } else {
       setIndustryOptions([]);
+      setStockOptions(filters.stockInfo); // ✅ fallback: all stocks
     }
-    setSelectedIndustry(null); // reset industry when sector changes
-  }, [selectedSector, filters.industry]);
+    setSelectedIndustry(null);
+    setSelectedStock(null);
+  }, [selectedSector, filters.industry, filters.stockInfo]);
+
+  // Update stocks when industry changes
+  useEffect(() => {
+    if (selectedIndustry) {
+      setStockOptions(
+        filters.stockInfo.filter(st => String(st.metaInfo?.industry) === String(selectedIndustry.value))
+      );
+    } else if (selectedSector) {
+      setStockOptions(
+        filters.stockInfo.filter(st => String(st.metaInfo?.sector) === String(selectedSector.value))
+      );
+    } else {
+      setStockOptions(filters.stockInfo); // ✅ fallback: all stocks
+    }
+    setSelectedStock(null);
+  }, [selectedIndustry, selectedSector, filters.stockInfo]);
 
   // Update fund names when fundType changes
   useEffect(() => {
     if (selectedFundType) {
       setFundNameOptions(
-        filters.mfName.filter(f => f.metaInfo?.type === selectedFundType.value)
+        filters.mfName.filter(f => String(f.metaInfo?.type) === String(selectedFundType.value))
       );
     } else {
       setFundNameOptions([]);
     }
-    setSelectedMfName(null); // reset mfName when fundType changes
+    setSelectedMfName(null);
   }, [selectedFundType, filters.mfName]);
 
   return (
@@ -112,7 +139,6 @@ const FilterSidebar = ({ isOpen, onClose, onFilterChange }) => {
               onFilterChange('industry', v);
             }}
             className="text-sm"
-            isDisabled={!selectedSector}
           />
         </div>
 
@@ -130,7 +156,7 @@ const FilterSidebar = ({ isOpen, onClose, onFilterChange }) => {
           />
         </div>
 
-        {/* Mutual Fund Name (depends on Fund Type) */}
+        {/* Mutual Fund Name */}
         <div>
           <label className="block font-medium text-gray-700 mb-1">Mutual Fund Name</label>
           <Select
@@ -141,7 +167,6 @@ const FilterSidebar = ({ isOpen, onClose, onFilterChange }) => {
               onFilterChange('mfName', v);
             }}
             className="text-sm"
-            isDisabled={!selectedFundType}
           />
         </div>
 
@@ -149,7 +174,7 @@ const FilterSidebar = ({ isOpen, onClose, onFilterChange }) => {
         <div>
           <label className="block font-medium text-gray-700 mb-1">Stock</label>
           <Select
-            options={filters.stockInfo}
+            options={stockOptions}   // ✅ always rendered (default all stocks, filtered on sector/industry)
             value={selectedStock}
             onChange={(v) => {
               setSelectedStock(v);
@@ -162,7 +187,15 @@ const FilterSidebar = ({ isOpen, onClose, onFilterChange }) => {
         {/* Buttons */}
         <div className="flex justify-between pt-4 border-t mt-2">
           <button
-            onClick={() => onFilterChange('apply')}
+            onClick={() =>
+              onFilterChange('apply', {
+                sector: selectedSector,
+                industry: selectedIndustry,
+                fundType: selectedFundType,
+                mfName: selectedMfName,
+                stockInfo: selectedStock
+              })
+            }
             className="bg-blue-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-blue-700 transition"
           >
             Apply
@@ -176,6 +209,7 @@ const FilterSidebar = ({ isOpen, onClose, onFilterChange }) => {
               setSelectedStock(null);
               setIndustryOptions([]);
               setFundNameOptions([]);
+              setStockOptions(filters.stockInfo); // ✅ reset to all stocks
               onFilterChange('clear');
             }}
             className="text-sm text-gray-600 hover:text-red-500 transition"
