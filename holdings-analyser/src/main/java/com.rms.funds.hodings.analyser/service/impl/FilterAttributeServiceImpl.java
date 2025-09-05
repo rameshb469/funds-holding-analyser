@@ -6,6 +6,7 @@ import com.rms.funds.hodings.analyser.repository.*;
 import com.rms.funds.hodings.analyser.service.FilterAttributeService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -25,6 +26,7 @@ public class FilterAttributeServiceImpl implements FilterAttributeService {
     private final MutualFundRepository mutualFundRepository;
     private final MutualFundTypeRepository mutualFundTypeRepository;
     private final StockInfoRepository stockInfoRepository;
+    private final MfHoldingRepository mfHoldingRepository;
 
     @Override
     public FilterAttributes getAll(FilterCriteria filterCriteria) {
@@ -39,6 +41,7 @@ public class FilterAttributeServiceImpl implements FilterAttributeService {
                         Map.of("type", filterCriteria.getFundTypes())))
                 .stockInfo(getAttributes(cachedFilterAttributes.getStockInfo(), filterCriteria.getStocks(),
                         Map.of("sector", filterCriteria.getSectors(), "industry", filterCriteria.getIndustries())))
+                .dates(cachedFilterAttributes.getDates())
                 .build();
     }
 
@@ -93,10 +96,11 @@ public class FilterAttributeServiceImpl implements FilterAttributeService {
                         .name(stock.getCompany())
                         .description(stock.getSymbol())
                         .metaInfo(Map.of(
-                                "sector", stock.getSectorEntity().getId()+"",
+                                "sector", stock.getSector().getId()+"",
                                 "industry", stock.getIndustry().getId()+"" )
                                 )
                         .build()).toList())
+                .dates(mfHoldingRepository.findLast12Dates(PageRequest.of(0, 12)))
                 .build();
     }
 }

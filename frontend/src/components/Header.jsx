@@ -14,6 +14,8 @@ export default function Header() {
   const navLinks = [
     { name: "Dashboard", path: "/" },
     { name: "StockView", path: "/stocks/678" },
+    { name: 'Holding Change', path : "/reports/holding-change"},
+    { name: 'Sector Insights', path : "/sector-insights"},
     { name: "Configurations", path: "/reports/configuration" },
     { name: "Download Report", path: "/reports/download-urls" }
     // {
