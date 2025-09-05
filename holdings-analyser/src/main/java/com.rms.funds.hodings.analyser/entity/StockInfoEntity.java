@@ -45,7 +45,7 @@ public class StockInfoEntity {
 
     @OneToOne
     @JoinColumn(name = "sector_id", insertable = false, updatable = false)
-    private SectorEntity sectorEntity;
+    private SectorEntity sector;
 
     @Column(name = "ISIN_NUMBER")
     private String isinNumber;

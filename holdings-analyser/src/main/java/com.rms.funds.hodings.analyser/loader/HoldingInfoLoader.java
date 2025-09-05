@@ -68,6 +68,7 @@ public class HoldingInfoLoader {
 
             if (holdingRepository.existsByMutualFundIdAndAtDate(config.getMutualFundId(), downloadLinkPair.getRight())) {
                 log.info("Skipping Mutual fund job for {} mutual fund and {} date since its already existed", config.getMutualFundId(), downloadLinkPair.getRight());
+                return;
             }
             futures.add(executorService.submit(new HoldingExtractor(fileDownloader, downloadLinkPair, config)));
 

@@ -66,7 +66,7 @@ public class StockLoaderService implements CommandLineRunner {
                          .marketLot(safeInt(stock.market_lot).orElse(0))
                          .isinNumber(stock.isin_number)
                          .faceValue(safeInt(stock.face_value).orElse(0))
-                         .sectorEntity(sectorRepository.findById(default_sector_id).orElse(null))
+                         .sector(sectorRepository.findById(default_sector_id).orElse(null))
                          .industry(industryRepository.findById(default_industry_id).orElse(null))
                          .marketCap(Long.valueOf(safeInt(stock.market_lot).orElse(0)))
                          .createdAt(LocalDateTime.now())

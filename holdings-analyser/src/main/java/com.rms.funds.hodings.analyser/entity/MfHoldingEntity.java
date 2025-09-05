@@ -39,11 +39,11 @@ public class MfHoldingEntity {
 
     private Double avgPrice;
 
-//    @Column(name = "net_asset_pct")
-//    private Double netAssetPct;
+    private Double netAssetPct;
 
     private LocalDate atDate;
 
+    @Transient
     public Double getAvgPrice() {
         if (quantity != null && quantity > 0) {
             return (marketValue/quantity);

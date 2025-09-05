@@ -4,6 +4,8 @@ import Dashboard from './pages/Dashboard'
 import NotFound from './pages/NotFound'
 import Reports from './pages/Reports'
 import DownloadUrlReport from './pages/DownloadUrlReport'
+import HoldingChangeView from './pages/HoldingChangeView'
+import SectorIndustryInsights from './pages/SectorIndustryInsights'
 
 function App() {
   return (
@@ -13,6 +15,8 @@ function App() {
          <Route path="/stocks/:stockId" element={<StockView />} />
         <Route path='/reports/configuration' element={<Reports />} />
         <Route path='/reports/download-urls' element={<DownloadUrlReport/>} />
+        <Route path="/reports/holding-change" element={<HoldingChangeView/>} />
+        <Route path="/sector-insights" element={<SectorIndustryInsights />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
