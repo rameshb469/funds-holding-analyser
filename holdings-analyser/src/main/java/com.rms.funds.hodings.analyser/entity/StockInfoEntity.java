@@ -53,8 +53,15 @@ public class StockInfoEntity {
     @Column(name = "MKT_CAP")
     private Long marketCap;
 
-    @Column(name = "TOTAL_FLOATING_SHARES")
-    private Long totalFloatingShares;
+//    @Column(name = "TOTAL_FLOATING_SHARES")
+//    private Long totalFloatingShares;
+
+    @Column(name = "shares_outstanding")
+    private Long  sharesOutstanding;
+
+    private Integer rank;
+
+    private String marketCapCategory;
 
     @CreatedDate
     private LocalDateTime createdAt;

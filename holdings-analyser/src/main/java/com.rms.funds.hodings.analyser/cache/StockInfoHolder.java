@@ -118,5 +118,49 @@ public class StockInfoHolder {
         //INE774D01024 --> INE774D20024
         groupByIsinNumber.put("INE774D20024", groupByIsinNumber.get("INE774D01024"));
 
+        //INE177H01021 --> INE177H01039
+        groupByIsinNumber.put("INE177H01039", groupByIsinNumber.get("INE177H01021"));
+
+        //INE386A01015 --> INE386A01023
+        groupByIsinNumber.put("INE386A01023", groupByIsinNumber.get("INE386A01015"));
+        //INE703F01010 --> INE302A01020
+        groupByIsinNumber.put("INE703F01010", groupByIsinNumber.get("INE302A01020"));
+        // INE775A08105--> INE775A01035
+        groupByIsinNumber.put("INE775A08105", groupByIsinNumber.get("INE775A01035"));
+
+        // INE545A01024 --> INE545A01016
+        groupByIsinNumber.put("INE545A01024", groupByIsinNumber.get("INE545A01016"));
+
+        // FREE_CASH --> INE020B08FJ3
+        groupByIsinNumber.put("INE020B08FJ3", groupByIsinNumber.get("FREE_CASH"));
+
+        // FREE_CASH --> INE1C3207081
+        groupByIsinNumber.put("INE1C3207081", groupByIsinNumber.get("FREE_CASH"));
+        // FREE_CASH --> https://nsdl.co.in/master_search_detail_res.php?isin=INE059B13029
+        groupByIsinNumber.put("INE059B13029", groupByIsinNumber.get("FREE_CASH"));
+        // INE495B13025
+        groupByIsinNumber.put("INE495B13025", groupByIsinNumber.get("FREE_CASH"));
+        //INE280B01018
+        groupByIsinNumber.put("INE280B01018", groupByIsinNumber.get("FREE_CASH"));
+        //INE1JAR25012
+        groupByIsinNumber.put("INE1JAR25012", groupByIsinNumber.get("FREE_CASH"));
+        //INE0GGX23010
+        groupByIsinNumber.put("INE0GGX23010", groupByIsinNumber.get("FREE_CASH"));
+        //INE494B04019
+        groupByIsinNumber.put("INE494B04019", groupByIsinNumber.get("FREE_CASH"));
+        //INE122R01018
+        groupByIsinNumber.put("INE122R01018", groupByIsinNumber.get("FREE_CASH"));
+        //INE0H7R23014
+        groupByIsinNumber.put("INE0H7R23014", groupByIsinNumber.get("FREE_CASH"));
+        //INE0NR623014
+        groupByIsinNumber.put("INE0NR623014", groupByIsinNumber.get("FREE_CASH"));
+
+
+
+
+
+
+
+
     }
 }

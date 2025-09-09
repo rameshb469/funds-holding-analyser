@@ -29759,5 +29759,20 @@
     "updated_at": "2024-03-16 18:18:31.465203",
     "sector": "Plastic Products",
     "mkt_cap": 261
+  },
+  {
+    "symbol": "WPIL",
+    "name_of_company": "WPIL Limited",
+    "series": "BE",
+    "date_of_listing": "2006-09-14",
+    "paid_up_value": 10,
+    "market_lot": 1,
+    "isin_number": "INE765D01022",
+    "face_value": 10,
+    "industry": "Compressors / Pumps",
+    "created_at": "2024-03-16 18:18:31.468195",
+    "updated_at": "2024-03-16 18:18:31.468195",
+    "sector": "Capital Goods",
+    "mkt_cap": 4744
   }
 ]
