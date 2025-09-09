@@ -1,0 +1,39 @@
+INSERT INTO public.stock_details (
+    symbol,
+    name_of_company,
+    industry_id,
+    sector_id,
+    mkt_cap,
+    series,
+    date_of_listing,
+    paid_up_value,
+    market_lot,
+    isin_number,
+    face_value,
+    total_floating_shares,
+    created_at,
+    market_cap,
+    shares_outstanding,
+    rank,
+    market_cap_category
+)
+SELECT
+    'NSDL.BO' AS symbol,
+    'National Securities Depository Ltd' AS name_of_company,
+    i.id AS industry_id,
+    i.sector_id AS sector_id,
+    268439994368/100000 AS mkt_cap,
+    'BE' AS series,
+    DATE '2025-08-06' AS date_of_listing,
+    2 AS paid_up_value,
+    1 AS market_lot,
+    'INE301O01023' AS isin_number,
+    10 AS face_value,
+    167880000 AS total_floating_shares,
+    CURRENT_TIMESTAMP AS created_at,
+    268439994368/100000 AS market_cap,
+    200000000 AS shares_outstanding,
+    258 AS rank,
+    'SmallCap' AS market_cap_category
+FROM industry i
+WHERE i.name = 'Misc. Commercial Services';

@@ -1,21 +1,20 @@
-package com.rms.funds.hodings.analyser.loader;
+package com.rms.funds.hodings.analyser.test;
 
 import com.rms.funds.hodings.analyser.cache.StockInfoHolder;
 import com.rms.funds.hodings.analyser.entity.ExtractorJobEntity;
 import com.rms.funds.hodings.analyser.entity.MutualFundConfigEntity;
 import com.rms.funds.hodings.analyser.entity.MutualFundHoldingEntity;
 import com.rms.funds.hodings.analyser.entity.StockInfoEntity;
+import com.rms.funds.hodings.analyser.loader.HoldingInfoLoader;
+import com.rms.funds.hodings.analyser.model.ExcelDownloaderAttributes;
 import com.rms.funds.hodings.analyser.model.MutualFundStockHolding;
 import com.rms.funds.hodings.analyser.model.Result;
 import com.rms.funds.hodings.analyser.reader.FileDownloader;
-import com.rms.funds.hodings.analyser.repository.ExtractorJobRepository;
-import com.rms.funds.hodings.analyser.repository.MutualFundConfigRepository;
-import com.rms.funds.hodings.analyser.repository.MutualFundHoldingRepository;
-import com.rms.funds.hodings.analyser.repository.StockInfoRepository;
+import com.rms.funds.hodings.analyser.repository.*;
+import com.rms.funds.hodings.analyser.utility.DateUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Component;
@@ -23,95 +22,114 @@ import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static com.rms.funds.hodings.analyser.utility.DateUtil.getDownloadLinks;
-import static java.util.stream.Collectors.groupingBy;
+import static com.rms.funds.hodings.analyser.helper.MapperUtil.getAttributes;
 
 @Component
+@Slf4j
 @RequiredArgsConstructor
-public class HoldingInfoLoader {
+public class ExtractorJobLoader
+//implements CommandLineRunner
+{
 
-    private static final Logger log = LoggerFactory.getLogger(HoldingInfoLoader.class);
-    private final StockInfoRepository stockInfoRepository;
-    private final FileDownloader fileDownloader;
-    private final MutualFundConfigRepository mutualFundConfigRepository;
-    private final MutualFundHoldingRepository holdingRepository;
+    private final MutualFundConfigRepository configRepository;
     private final ExtractorJobRepository extractorJobRepository;
+    private final MutualFundHoldingRepository holdingRepository;
+    private final FileDownloader fileDownloader;
     private final StockInfoHolder stockInfoHolder;
 
-    public void processJobs(List<ExtractorJobEntity> extractorJobEntities) {
-        if (!CollectionUtils.isEmpty(extractorJobEntities)) {
-            var groupByConfigId = extractorJobEntities.stream()
-                    .collect(groupingBy(ExtractorJobEntity::getMutualFundConfigId));
+    //@Override
+    public void run(String... args) throws Exception {
 
-            for (var entry : groupByConfigId.entrySet()) {
-                try {
-                    Optional.ofNullable(entry.getValue().get(0))
-                            .map(ExtractorJobEntity::getConfig)
-                            .ifPresent(config -> startJob(config, entry.getValue().stream().map(e -> Pair.of(e.getUrl(), e.getAtDate())).toList()));
+        List<MutualFundConfigEntity> configEntities = configRepository.findAll()
+                .stream()
+                .filter(mf -> mf.getMutualFundId() >= 79 && mf.getMutualFundId() <= 88)
+                .toList();
 
-                } catch (Exception e) {
-                    log.error("Error ocurred while "+entry.getKey());
-                }
-            }
-        }
-    }
+        for (MutualFundConfigEntity config : configEntities) {
+            List<Pair<String, LocalDate>> links = DateUtil.getDownloadLinks(config).stream().limit(2).toList();
 
-    private void startJob(MutualFundConfigEntity config,
-                          List<Pair<String, LocalDate>> downloadLinks){
-        ExecutorService executorService = Executors.newFixedThreadPool(1);
-        List<Future<Result>> futures = new ArrayList<>();
-        log.info("starting job config : {} ", config.getId());
-
-        for (var downloadLinkPair : downloadLinks) {
-
-            if (holdingRepository.existsByMutualFundIdAndAtDate(config.getMutualFundId(), downloadLinkPair.getRight())) {
-                log.info("Skipping Mutual fund job for {} mutual fund and {} date since its already existed", config.getMutualFundId(), downloadLinkPair.getRight());
-                return;
-            }
-            futures.add(executorService.submit(new HoldingExtractor(fileDownloader, downloadLinkPair, config)));
-
-            // Collecting results
+            int index = 0;
             List<Result> results = new ArrayList<>();
-            for (Future<Result> future : futures) {
-                try {
-                    results.add(future.get()); // Wait for task to complete
-                } catch (InterruptedException | ExecutionException e) {
-                    log.error("Unable to process it.. ");
+            for (var pair : links){
+
+              //  if (index++ == 0) continue;
+
+                if (!extractorJobRepository.exists(Example.of(ExtractorJobEntity.builder()
+                                .mutualFundConfigId(config.getId())
+                                .atDate(pair.getRight())
+                        .build()))) {
+                    System.out.println("Need to add At date : "+pair.getRight()+" link : "+pair.getLeft() +" for config "+config.getMutualFund().getName());
+                    var jobEntry = extractorJobRepository.save(ExtractorJobEntity.builder()
+                            .url(pair.getLeft())
+                            .atDate(pair.getRight())
+                            .mutualFundConfigId(config.getId())
+                            .config(config)
+                            .recordCount(0)
+                            .recordCount(0)
+                            .recordCount(0)
+                            .status("FAILED")
+                            .createdAt(LocalDateTime.now())
+                            .updatedAt(LocalDateTime.now())
+                            .build());
+
+                    Result result = call(pair, config);
+                    results.add(result);
+
+                } {
+                    System.out.println("Already there At date : "+pair.getRight()+" link : "+pair.getLeft() +" for config "+config.getMutualFund().getName());
                 }
             }
-
-            // Shutdown executor
-            executorService.shutdown();
             saveMutualFundHoldings(results);
         }
+
     }
 
-    public void process(List<MutualFundConfigEntity> configList) {
+    public void save(List<Pair<String, LocalDate>> pairs, MutualFundConfigEntity config) {
 
-        for (MutualFundConfigEntity config : configList) {
-            List<Pair<String, LocalDate>> downloadLinks = getDownloadLinks(config);
-            startJob(config, downloadLinks);
+        List<Result> results = new ArrayList<>();
+
+        for (var pair : pairs) {
+            try {
+                Result result = call(pair, config);
+                results.add(result);
+            } catch (Exception e) {
+                log.error("error occurred {} and date : {}", pair.getLeft(), pair.getRight());
+            }
         }
+
+        saveMutualFundHoldings(results);
     }
 
-    public void processAll() throws Exception {
+    private Result call(Pair<String, LocalDate> downloadLinkPair,
+                       MutualFundConfigEntity config) throws Exception {
+        String link = downloadLinkPair.getLeft();
 
-        Map<Long, List<MutualFundConfigEntity>> configEntitiesMap = mutualFundConfigRepository.findAll().stream()
-                .filter(x -> x.getMutualFund() != null)
-                .filter(MutualFundConfigEntity::getIsActive)
-                .filter(x -> x.getMutualFund().getMutualFundHouseId().equals(1L))
-                .collect(groupingBy(MutualFundConfigEntity::getMutualFundId));
+        LocalDate atDate = downloadLinkPair.getRight();
 
-        for (var entry : configEntitiesMap.entrySet()) {
-            process(entry.getValue());
+        Result result = new Result();
+        result.setConfigId(config.getId());
+        //  result.setMutualFundId(mutualFundId);
+        result.setName(getFundName(config));
+        result.setAtDate(atDate);
+        result.setDownloadLink(link);
+        ExcelDownloaderAttributes attributes = getAttributes(link, config);
+
+        try {
+            var holdings =  fileDownloader.downloadExcelFile(attributes.getUrl(), attributes);
+            result.setHoldings(holdings);
+            result.setStatus(Result.Status.SUCCESSFUL);
+
+        } catch (Exception e) {
+            log.error("{} Error occurred while called rest template {}", attributes.getUrl(), e.getLocalizedMessage());
+            result.setError(e.getMessage());
+            result.setStatus(Result.Status.FAILED);
         }
+
+        return result;
     }
 
 
@@ -133,7 +151,7 @@ public class HoldingInfoLoader {
 
             Result.Status status = result.getStatus();
 
-            MutualFundConfigEntity config = mutualFundConfigRepository.findById(result.getConfigId()).orElseThrow(() -> new RuntimeException("Invalid Config Id : " + result.getConfigId()));
+            MutualFundConfigEntity config = configRepository.findById(result.getConfigId()).orElseThrow(() -> new RuntimeException("Invalid Config Id : " + result.getConfigId()));
 
             try {
                 AtomicReference<Double> totalNetAssetPct = new AtomicReference<>(100.00);
@@ -214,5 +232,14 @@ public class HoldingInfoLoader {
             return (entity.getMarketValue() / entity.getNetAssetPct()) * totalNetAssetPctValue;
         }
         return 0.0;
+    }
+
+    private String getFundName(MutualFundConfigEntity config) {
+        if (config != null && config.getMutualFund() != null) {
+            return config.getMutualFund().getName();
+        } else if (config != null) {
+            return "Invalid -mutual-fund-id-config-id"+config.getId();
+        }
+        return "Invalid -mutual-fund-id-config-id";
     }
 }

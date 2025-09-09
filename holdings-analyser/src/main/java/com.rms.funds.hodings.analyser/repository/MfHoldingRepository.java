@@ -2,6 +2,7 @@ package com.rms.funds.hodings.analyser.repository;
 
 import com.rms.funds.hodings.analyser.controller.dto.SectorIndustryStockChangeDTO;
 import com.rms.funds.hodings.analyser.entity.MfHoldingEntity;
+import com.rms.funds.hodings.analyser.entity.MutualFundHoldingEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -58,5 +59,9 @@ public interface MfHoldingRepository extends JpaRepository<MfHoldingEntity, Long
             @Param("currentDate") LocalDate currentDate,
             @Param("prevDate") LocalDate prevDate);
 
+    @Query("SELECT h FROM MutualFundHoldingEntity h " +
+                "JOIN FETCH h.stockInfoEntity s " +
+                "WHERE h.atDate = :atDate AND s.symbol <> 'CASH' ")
+    List<MutualFundHoldingEntity> findByAtDate(@Param("atDate") LocalDate atDate);
 
 }

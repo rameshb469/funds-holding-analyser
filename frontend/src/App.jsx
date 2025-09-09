@@ -6,6 +6,7 @@ import Reports from './pages/Reports'
 import DownloadUrlReport from './pages/DownloadUrlReport'
 import HoldingChangeView from './pages/HoldingChangeView'
 import SectorIndustryInsights from './pages/SectorIndustryInsights'
+import InvestmentInsights from './pages/InvestmentInsights'
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path='/reports/download-urls' element={<DownloadUrlReport/>} />
         <Route path="/reports/holding-change" element={<HoldingChangeView/>} />
         <Route path="/sector-insights" element={<SectorIndustryInsights />} />
+        <Route path="/investment-insights" element={<InvestmentInsights />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
