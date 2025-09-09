@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -131,8 +132,15 @@ public class StockInfoHolder {
         // INE545A01024 --> INE545A01016
         groupByIsinNumber.put("INE545A01024", groupByIsinNumber.get("INE545A01016"));
 
+        // INE134E08MA1 -> INE134E01011
+        groupByIsinNumber.put("INE134E08MA1", groupByIsinNumber.get("INE134E01011"));
+
+        // INE766P20016 --> INE766P01016
+        groupByIsinNumber.put("INE766P20016", groupByIsinNumber.get("INE766P01016"));
+
         // FREE_CASH --> INE020B08FJ3
         groupByIsinNumber.put("INE020B08FJ3", groupByIsinNumber.get("FREE_CASH"));
+
 
         // FREE_CASH --> INE1C3207081
         groupByIsinNumber.put("INE1C3207081", groupByIsinNumber.get("FREE_CASH"));
@@ -154,6 +162,10 @@ public class StockInfoHolder {
         groupByIsinNumber.put("INE0H7R23014", groupByIsinNumber.get("FREE_CASH"));
         //INE0NR623014
         groupByIsinNumber.put("INE0NR623014", groupByIsinNumber.get("FREE_CASH"));
+
+        List.of("INE671B01034", "INE549I01011", "INE066P20011", "INE643A20019").forEach(stock -> {
+            groupByIsinNumber.put(stock, groupByIsinNumber.get("FREE_CASH"));
+        });
 
 
 

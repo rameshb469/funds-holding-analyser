@@ -32,7 +32,7 @@ import static com.rms.funds.hodings.analyser.helper.MapperUtil.getAttributes;
 @Slf4j
 @RequiredArgsConstructor
 public class ExtractorJobLoader
-//implements CommandLineRunner
+implements CommandLineRunner
 {
 
     private final MutualFundConfigRepository configRepository;
@@ -41,12 +41,15 @@ public class ExtractorJobLoader
     private final FileDownloader fileDownloader;
     private final StockInfoHolder stockInfoHolder;
 
-    //@Override
+    @Override
     public void run(String... args) throws Exception {
+
+      //  if (true) return;
 
         List<MutualFundConfigEntity> configEntities = configRepository.findAll()
                 .stream()
-                .filter(mf -> mf.getMutualFundId() >= 79 && mf.getMutualFundId() <= 88)
+                .filter(mf -> mf.getMutualFundId() >= 59 && mf.getMutualFundId() <= 69)
+              //  .filter(x -> x.getDownloadUrl().contains("https://www.assetmanagement.hsbc.co.in/en/mutual-funds/investor-resources/-/media/files/attachments/india/mutual-funds/portfolios/document"))
                 .toList();
 
         for (MutualFundConfigEntity config : configEntities) {
