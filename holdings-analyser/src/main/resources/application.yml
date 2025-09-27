@@ -8,9 +8,10 @@ spring:
     show-sql: true
   datasource:
     platform: postgres
-    url: jdbc:postgresql://${MF_HOLDING_HOST:localhost}:5432/${MF_HOLDING_DB:funds-holding-analyser}
-    username: ${MF_HOLDING_DB_USERNAME:postgres}
-    password: ${MF_HOLDING_DB_PWD:root}
+    url : ${DATABASE_URL}
+    #url: jdbc:postgresql://${MF_HOLDING_HOST:localhost}:5432/${MF_HOLDING_DB:funds-holding-analyser}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:root}
     driverClassName: org.postgresql.Driver
   flyway:
     enabled: true
