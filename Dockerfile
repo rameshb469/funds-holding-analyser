@@ -13,17 +13,19 @@ COPY backend backend
 WORKDIR /app/backend
 RUN gradle clean copyFrontendBuild --no-daemon
 
-# Build Spring Boot JAR
-RUN gradle bootJar --no-daemon
+# Build Spring Boot JAR with explicit name
+RUN gradle bootJar --no-daemon -PbootJar.archiveBaseName=holdings-analyser
 
 # Stage 2: Run
 FROM eclipse-temurin:17-jdk-alpine
 
 WORKDIR /app
 
-# Copy the Spring Boot JAR from build stage
-COPY --from=build /app/backend/build/libs/*.jar app.jar
+# Copy the built JAR from build stage
+COPY --from=build /app/backend/build/libs/holdings-analyser-1.0-SNAPSHOT.jar app.jar
 
+# Expose default Spring Boot port
 EXPOSE 8080
 
+# Run the Spring Boot application
 ENTRYPOINT ["java", "-jar", "app.jar"]
