@@ -100,3 +100,11 @@ tasks.named("processResources") {
     dependsOn("copyFrontendBuild")
 }
 
+if (project.hasProperty('skipFrontend')) {
+    tasks.named('npmBuild').configure { enabled = false }
+    tasks.named('copyFrontendBuild').configure { enabled = false }
+    tasks.named('cleanFrontend').configure { enabled = false }
+    tasks.named('processResources').configure {
+        dependsOn = []
+    }
+}
