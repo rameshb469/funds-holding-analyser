@@ -38,3 +38,29 @@ EXPOSE 8080
 
 # Run Spring Boot
 ENTRYPOINT ["java", "-jar", "app.jar"]
+
+# Start from a base image
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Install dependencies first for better caching
+COPY package*.json ./
+RUN npm install
+
+# Copy the rest of the application code
+COPY . .
+
+# Build the application (if applicable)
+# RUN npm run build
+
+# Production image
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY --from=builder /app ./
+
+EXPOSE 3000
+
+CMD ["npm", "start"]
