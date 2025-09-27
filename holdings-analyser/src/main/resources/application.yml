@@ -2,22 +2,23 @@ spring:
   application:
     name: funds-holding-analyser
   profiles:
-    active : local
+    active: local
   jpa:
     database: POSTGRESQL
     show-sql: true
   datasource:
     platform: postgres
-    url : ${DATABASE_URL}
-    #url: jdbc:postgresql://${MF_HOLDING_HOST:localhost}:5432/${MF_HOLDING_DB:funds-holding-analyser}
     username: ${DATABASE_USERNAME:postgres}
     password: ${DATABASE_PASSWORD:root}
-    driverClassName: org.postgresql.Driver
+    driver-class-name: org.postgresql.Driver
   flyway:
     enabled: true
     shouldRepair: true
     baseline-on-migration: true
     placeholderReplacement: false
+
+    #url: jdbc:postgresql://${MF_HOLDING_HOST:localhost}:5432/${MF_HOLDING_DB:funds-holding-analyser}
+
 
 logging:
   file:
