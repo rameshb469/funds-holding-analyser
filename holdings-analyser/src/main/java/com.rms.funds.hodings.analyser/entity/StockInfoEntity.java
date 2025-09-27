@@ -1,10 +1,7 @@
 package com.rms.funds.hodings.analyser.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -17,6 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@Setter
 public class StockInfoEntity {
 
     @Id
@@ -53,8 +51,8 @@ public class StockInfoEntity {
     @Column(name = "MKT_CAP")
     private Long marketCap;
 
-//    @Column(name = "TOTAL_FLOATING_SHARES")
-//    private Long totalFloatingShares;
+    @Column(name = "TOTAL_FLOATING_SHARES")
+    private Long totalFloatingShares;
 
     @Column(name = "shares_outstanding")
     private Long  sharesOutstanding;

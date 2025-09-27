@@ -59,9 +59,21 @@ public interface MfHoldingRepository extends JpaRepository<MfHoldingEntity, Long
             @Param("currentDate") LocalDate currentDate,
             @Param("prevDate") LocalDate prevDate);
 
-    @Query("SELECT h FROM MutualFundHoldingEntity h " +
+    @Query("SELECT h FROM MfHoldingEntity h " +
                 "JOIN FETCH h.stockInfoEntity s " +
                 "WHERE h.atDate = :atDate AND s.symbol <> 'CASH' ")
-    List<MutualFundHoldingEntity> findByAtDate(@Param("atDate") LocalDate atDate);
+    List<MfHoldingEntity> findByAtDate(@Param("atDate") LocalDate atDate);
+
+    // Get holdings between two dates (for trend analysis)
+    @Query("SELECT h FROM MfHoldingEntity h WHERE h.atDate BETWEEN :from AND :to")
+    List<MfHoldingEntity> findByAtDateBetween(LocalDate from, LocalDate to);
+
+    // Optional: Fetch by stockId and date range
+    @Query("SELECT h FROM MfHoldingEntity h WHERE h.stockId = :stockId AND h.atDate BETWEEN :from AND :to")
+    List<MfHoldingEntity> findByStockIdAndAtDateBetween(Long stockId, LocalDate from, LocalDate to);
+
+    // Optional: Latest holding date
+    @Query("SELECT MAX(h.atDate) FROM MfHoldingEntity h")
+    LocalDate findLatestAtDate();
 
 }
