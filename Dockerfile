@@ -10,13 +10,13 @@ COPY frontend frontend
 COPY holdings-analyser holdings-analyser
 
 # Build React frontend first (Node plugin)
-WORKDIR /app/frontend
-RUN npm install
-RUN npm run build
-
-# Copy React build to Spring Boot static resources in child project
-RUN mkdir -p /app/holdings-analyser/src/main/resources/static
-RUN cp -r build/* /app/holdings-analyser/src/main/resources/static/
+# WORKDIR /app/frontend
+# # RUN npm install
+# # RUN npm run build
+#
+# # Copy React build to Spring Boot static resources in child project
+# RUN mkdir -p /app/holdings-analyser/src/main/resources/static
+# RUN cp -r build/* /app/holdings-analyser/src/main/resources/static/
 
 # Back to child project directory
 WORKDIR /app/holdings-analyser
