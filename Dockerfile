@@ -3,13 +3,13 @@ FROM gradle:8.5-jdk17 AS build
 
 WORKDIR /app
 
-# Copy Gradle and projects
+# Copy Gradle wrapper + build files
 COPY gradle gradle
 COPY build.gradle settings.gradle ./
 COPY frontend frontend
 COPY holdings-analyser holdings-analyser
 
-# Build React + Spring Boot
+# Build frontend + backend
 WORKDIR /app/holdings-analyser
 RUN gradle clean copyFrontendBuild bootJar --no-daemon
 
