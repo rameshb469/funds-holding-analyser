@@ -11,7 +11,7 @@ COPY holdings-analyser holdings-analyser
 
 # Build frontend + backend
 WORKDIR /app/holdings-analyser
-RUN gradle clean build --no-daemon
+RUN gradle clean build
 
 # Stage 2: Run
 FROM eclipse-temurin:17-jdk-alpine
