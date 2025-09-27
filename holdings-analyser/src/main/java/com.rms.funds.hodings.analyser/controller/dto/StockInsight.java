@@ -1,27 +1,27 @@
 package com.rms.funds.hodings.analyser.controller.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
-// StockInsight.java
+import java.util.List;
+
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 @Builder
 public class StockInsight {
+    private Long stockId;
     private String symbol;
     private String company;
-    private String marketCapCategory; // LargeCap / MidCap / SmallCap
-    private Long quantity;
-    private Double netAssetPct;
-    private Long marketCap;
-
-    private Double valueChange;       // absolute change in exposure
-    private Double valueChangePct;    // % change in exposure
-    private Double weightChangePct;   // Δ weight in portfolio
-
-    private String type;              // stable | growth | avoid | new
+    private String marketCapCategory;
+    private Long quantityCurr;
+    private Long quantityPrev;
+    private Double valueCurr;
+    private Double valuePrev;
+    private Double netAssetPctCurr;
+    private Double netAssetPctPrev;
+    private Double weightChangePct;
+    private Double quantityChangePct;
+    private Double valueChangePct;
+    private List<String> signals;
+    private int score;
+    private String recommendation;
 }
-

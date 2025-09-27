@@ -40,7 +40,7 @@ public class StockLoaderService implements CommandLineRunner {
     public void run(String... args) throws Exception {
 
         ObjectMapper objectMapper = new ObjectMapper();
-        File file = ResourceUtils.getFile("classpath:python/stock_details_enriched.json");
+        File file = ResourceUtils.getFile("classpath:scripts/stocks_enriched.json");
         List<StockInfo> list = objectMapper.readValue(file, new TypeReference<List<StockInfo>>() {});
 
         List<StockInfoEntity> updated = new ArrayList<>();
