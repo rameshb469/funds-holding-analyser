@@ -16,6 +16,8 @@ spring:
   flyway:
     enabled: true
     shouldRepair: true
+    connect-retries: 10
+    schemas: public
     baseline-on-migration: true
     placeholderReplacement: false
 
