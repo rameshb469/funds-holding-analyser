@@ -22,6 +22,10 @@ spring:
     placeholderReplacement: false
 
 logging:
+  level:
+    org.flywaydb: DEBUG
+    org.springframework.jdbc.datasource: DEBUG
+    org.springframework.boot.autoconfigure.flyway: DEBUG
   file:
     name : logs/myapp.log
     path : logs
@@ -36,3 +40,5 @@ internal:
   funds:
     vanguard:
       funds-links : https://investor.vanguard.com/investment-products/list/funddetail
+
+
