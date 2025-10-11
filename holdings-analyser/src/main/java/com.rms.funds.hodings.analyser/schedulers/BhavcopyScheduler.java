@@ -43,11 +43,11 @@ public class BhavcopyScheduler implements CommandLineRunner {
     public void run(String... args) throws Exception {
         //fetchAndStoreBhavcopy();
 
-        for (LocalDate date : getLast6MonthsWeekdays()) {
-            System.out.println("Starting the date : "+date.format(DateTimeFormatter.ISO_DATE));
-            nseBhavcopyService.fetchAndStoreBhavcopy(date);
-            System.out.println("End the date : "+date.format(DateTimeFormatter.ISO_DATE));
-        }
+//        for (LocalDate date : getLast6MonthsWeekdays()) {
+//            System.out.println("Starting the date : "+date.format(DateTimeFormatter.ISO_DATE));
+//            nseBhavcopyService.fetchAndStoreBhavcopy(date);
+//            System.out.println("End the date : "+date.format(DateTimeFormatter.ISO_DATE));
+//        }
     }
 
     public List<LocalDate> getLast6MonthsWeekdays() {

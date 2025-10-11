@@ -48,18 +48,18 @@ implements CommandLineRunner
 
         List<MutualFundConfigEntity> configEntities = configRepository.findAll()
                 .stream()
-                .filter(mf -> mf.getMutualFundId() == 77)
+              //  .filter(mf -> mf.getMutualFundId() == 77)
               //  .filter(x -> x.getDownloadUrl().contains("https://www.assetmanagement.hsbc.co.in/en/mutual-funds/investor-resources/-/media/files/attachments/india/mutual-funds/portfolios/document"))
                 .toList();
 
         for (MutualFundConfigEntity config : configEntities) {
-            List<Pair<String, LocalDate>> links = DateUtil.getDownloadLinks(config).stream().limit(12).toList();
+            List<Pair<String, LocalDate>> links = DateUtil.getDownloadLinks(config).stream().limit(1).toList();
 
             int index = 0;
             List<Result> results = new ArrayList<>();
             for (var pair : links){
 
-                if (index++ <= 1) continue;
+               // if (index++ <= 1) continue;
 
                 if (!extractorJobRepository.exists(Example.of(ExtractorJobEntity.builder()
                                 .mutualFundConfigId(config.getId())

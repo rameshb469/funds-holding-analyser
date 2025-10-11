@@ -1,4 +1,4 @@
-import json
+.import json
 import requests
 import time
 import yfinance as yf

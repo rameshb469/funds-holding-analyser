@@ -2,6 +2,7 @@ package com.rms.funds.hodings.analyser.cache;
 
 import com.rms.funds.hodings.analyser.entity.StockInfoEntity;
 import com.rms.funds.hodings.analyser.repository.StockInfoRepository;
+import com.rms.funds.hodings.analyser.service.StockDataFetchService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,7 @@ public class StockInfoHolder {
     private static final String FREE_CASH_ISIN_CODE = "FREE_CASH";
 
     private final StockInfoRepository stockInfoRepository;
+    private final StockDataFetchService stockDataFetchService;
 
     private static final Map<String, StockInfoEntity> groupByIsinNumber = new LinkedHashMap<>();
 
@@ -34,7 +36,7 @@ public class StockInfoHolder {
             return Optional.of(groupByIsinNumber.get(isinCode));
         }
 
-        return stockInfoRepository.findByIsinNumber(isinCode);
+        return stockDataFetchService.findByIsinNumber(isinCode);
     }
 
     @PostConstruct
@@ -138,6 +140,13 @@ public class StockInfoHolder {
         // INE766P20016 --> INE766P01016
         groupByIsinNumber.put("INE766P20016", groupByIsinNumber.get("INE766P01016"));
 
+        // INE814H01029 -->INE814H01011
+        groupByIsinNumber.put("INE814H01029", groupByIsinNumber.get("INE814H01011"));
+        //INE768C01028 --> INE768C01010
+        groupByIsinNumber.put("INE768C01028", groupByIsinNumber.get("INE768C01010"));
+        // INE202B01038 --> INE140A01024
+        groupByIsinNumber.put("INE202B01038", groupByIsinNumber.get("INE140A01024"));
+
         // FREE_CASH --> INE020B08FJ3
         groupByIsinNumber.put("INE020B08FJ3", groupByIsinNumber.get("FREE_CASH"));
 
@@ -166,13 +175,5 @@ public class StockInfoHolder {
         List.of("INE671B01034", "INE549I01011", "INE066P20011", "INE643A20019").forEach(stock -> {
             groupByIsinNumber.put(stock, groupByIsinNumber.get("FREE_CASH"));
         });
-
-
-
-
-
-
-
-
     }
 }
