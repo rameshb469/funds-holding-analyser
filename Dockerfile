@@ -1,26 +1,39 @@
 # Stage 1: Build frontend
-FROM node:18 AS frontend-build
-WORKDIR /app/frontend
-COPY frontend/package.json frontend/package-lock.json ./
+FROM node:20-alpine AS frontend-build
+
+WORKDIR /frontend
+COPY frontend/package*.json ./
 RUN npm install
 COPY frontend/ ./
 RUN npm run build
 
 # Stage 2: Build backend
-FROM gradle:8.2.0-jdk17 AS backend-build
+FROM gradle:8.5-jdk17 AS backend-build
+
 WORKDIR /app
-COPY holdings-analyser/ holdings-analyser/
+COPY gradle gradle
 COPY build.gradle settings.gradle ./
-COPY gradlew ./
-COPY gradle/ gradle/
-# Copy frontend build to backend resources
-COPY --from=frontend-build /app/frontend/dist holdings-analyser/src/main/resources/static
-RUN ./gradlew :holdings-analyser:build --no-daemon
+COPY holdings-analyser holdings-analyser
+
+# Copy frontend build output into backend static resources
+RUN mkdir -p holdings-analyser/src/main/resources/static
+COPY --from=frontend-build /frontend/dist holdings-analyser/src/main/resources/static
+
+# Build backend
+WORKDIR /app/holdings-analyser
+RUN gradle clean build -PskipFrontend
 
 # Stage 3: Run
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jdk-alpine
+
 WORKDIR /app
+
+# Install Python 3 and pip
+RUN apk add --no-cache python3 py3-pip
+
+# Copy Spring Boot JAR
 COPY --from=backend-build /app/holdings-analyser/build/libs/holdings-analyser-1.0-SNAPSHOT.jar app.jar
+
 EXPOSE 8080
-ENV SPRING_PROFILES_ACTIVE=prod
+
 ENTRYPOINT ["java", "-jar", "app.jar"]

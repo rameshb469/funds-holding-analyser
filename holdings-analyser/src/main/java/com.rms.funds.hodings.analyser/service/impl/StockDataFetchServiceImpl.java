@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.rms.funds.hodings.analyser.utility.AppConst._100K;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -24,61 +26,81 @@ public class StockDataFetchServiceImpl implements StockDataFetchService {
     private final StockInfoRepository stockRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private static final String PYTHON_PATH = "python3";  // or "python" for Windows
+    private static final String PYTHON_PATH = "python3";  // change if using Windows
 
     @Override
     public Optional<StockInfoEntity> findByIsinNumber(String isinCsv) {
+        Optional<StockInfoEntity> dbValues = Optional.empty();
 
         try {
-
-            Optional<StockInfoEntity> dbValues = stockRepository.findByIsinNumber(isinCsv);
+            // 1️⃣ Check DB first
+            dbValues = stockRepository.findByIsinNumber(isinCsv);
             if (dbValues.isPresent()) {
+                log.info("✅ Found existing record for ISIN {}", isinCsv);
                 return dbValues;
             }
 
-            // 1️⃣ Load the script from classpath
+            // 2️⃣ Load Python script from resources
             InputStream scriptStream = getClass().getResourceAsStream("/scripts/fetch_by_isin.py");
             if (scriptStream == null) {
-                log.error("❌ Script not found in resources/scripts/");
-                Optional.empty();
+                log.error("❌ Python script not found in resources/scripts/");
+                return Optional.empty();
             }
 
-            // 2️⃣ Copy to temporary file
+            // 3️⃣ Copy script to a temp file
             Path tempScript = Files.createTempFile("fetch_by_isin_", ".py");
             Files.copy(scriptStream, tempScript, StandardCopyOption.REPLACE_EXISTING);
             scriptStream.close();
 
-            log.info("🚀 Running Python script from: {}", tempScript.toAbsolutePath());
+            log.info("🚀 Running Python script: {}", tempScript.toAbsolutePath());
 
-            // 3️⃣ Run Python process
+            // 4️⃣ Build process (keep stderr separate)
             ProcessBuilder pb = new ProcessBuilder(
                     PYTHON_PATH,
                     tempScript.toAbsolutePath().toString(),
                     isinCsv
             );
-            pb.redirectErrorStream(true);
 
             Process process = pb.start();
 
-            // 4️⃣ Capture output
-            StringBuilder output = new StringBuilder();
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+            // 5️⃣ Capture stdout (JSON)
+            StringBuilder jsonOutput = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream()))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    output.append(line).append("\n");
+                    jsonOutput.append(line);
                 }
             }
+
+            // 6️⃣ Capture stderr (logs)
+            new Thread(() -> {
+                try (BufferedReader errReader = new BufferedReader(
+                        new InputStreamReader(process.getErrorStream()))) {
+                    String errLine;
+                    while ((errLine = errReader.readLine()) != null) {
+                        log.info("🐍 {}", errLine);
+                    }
+                } catch (IOException e) {
+                    log.warn("Error reading Python stderr: {}", e.getMessage());
+                }
+            }).start();
 
             int exitCode = process.waitFor();
             if (exitCode != 0) {
                 log.error("❌ Python script exited with code {}", exitCode);
-                log.error("Output:\n{}", output);
                 return Optional.empty();
             }
 
-            // 5️⃣ Parse JSON output and insert
+            String cleanJson = jsonOutput.toString().trim();
+            if (cleanJson.isEmpty() || !cleanJson.startsWith("[")) {
+                log.error("❌ Invalid JSON output: {}", cleanJson);
+                return Optional.empty();
+            }
+
+            // 7️⃣ Parse JSON output
             List<Map<String, Object>> stockList = objectMapper.readValue(
-                    output.toString(),
+                    cleanJson,
                     new TypeReference<>() {}
             );
 
@@ -91,8 +113,8 @@ public class StockDataFetchServiceImpl implements StockDataFetchService {
                         .marketLot(parseInt(s.get("marketLot")))
                         .faceValue(parseInt(s.get("faceValue")))
                         .isinNumber((String) s.get("isinNumber"))
-                        .marketCap(parseLong(s.get("marketCap")))
-                        .totalFloatingShares(parseLong(s.get("totalFloatingShares")))
+                        .marketCap(parseLong(s.get("marketCap"))/_100K)
+                        .totalFloatingShares(parseLong(s.get("floatShares"))) // ✅ match Python key
                         .sharesOutstanding(parseLong(s.get("sharesOutstanding")))
                         .rank(parseInt(s.get("rank")))
                         .marketCapCategory((String) s.get("marketCapCategory"))
@@ -100,14 +122,22 @@ public class StockDataFetchServiceImpl implements StockDataFetchService {
                         .updatedAt(LocalDateTime.now())
                         .build();
 
-                dbValues = Optional.of(stockRepository.save(stock));
+                Optional<StockInfoEntity> existing = stockRepository.findBySymbol(stock.getSymbol());
+                if (existing.isPresent()) {
+                    log.info("⚠️ Stock with symbol {} already exists. Skipping insert.", stock.getSymbol());
+                    dbValues = existing;
+                } else {
+                    log.info("⚠️ Stock with symbol {} doesn't exists. inserting it.", stock.getSymbol());
+                    dbValues = Optional.of(stockRepository.save(stock));
+                    log.info("✅ Inserted stock {}", stock.getSymbol());
+                }
             }
 
-            log.info("✅ Inserted {} stocks into DB", stockList.size());
-
-            // 6️⃣ Clean up
             Files.deleteIfExists(tempScript);
+            log.info("✅ Completed fetch for ISIN {}", isinCsv);
+
             return dbValues;
+
         } catch (Exception e) {
             log.error("❌ Error executing Python script", e);
             return Optional.empty();
@@ -134,4 +164,3 @@ public class StockDataFetchServiceImpl implements StockDataFetchService {
         }
     }
 }
-
