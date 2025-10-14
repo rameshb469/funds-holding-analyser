@@ -46,10 +46,10 @@ public class BhavcopyScheduler implements CommandLineRunner {
         for (LocalDate date : getLast6MonthsWeekdays()) {
             System.out.println("Starting the date : "+date.format(DateTimeFormatter.ISO_DATE));
             try {
-                LocalDate yesterday = LocalDate.now().minusDays(1);
-                File csvFile = downloader.downloadBhavcopy(yesterday);
+              //  LocalDate yesterday = LocalDate.now().minusDays(1);
+                File csvFile = downloader.downloadBhavcopy(date);
                 parser.parseAndSave(csvFile);
-                System.out.println("✅ Stored bhavcopy for " + yesterday);
+                System.out.println("✅ Stored bhavcopy for " + date);
             } catch (Exception e) {
                 System.err.println("❌ Error in BhavcopyScheduler: " + e.getMessage()+ " for date "+date.format(DateTimeFormatter.ISO_DATE));
             }
@@ -59,7 +59,7 @@ public class BhavcopyScheduler implements CommandLineRunner {
 
     public List<LocalDate> getLast6MonthsWeekdays() {
         List<LocalDate> weekdays = new ArrayList<>();
-        LocalDate endDate = LocalDate.now();
+        LocalDate endDate = LocalDate.now().minusDays(1);
         LocalDate startDate = endDate.minusMonths(6);
 
         for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
