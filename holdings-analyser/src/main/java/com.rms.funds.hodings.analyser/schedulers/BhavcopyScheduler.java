@@ -45,7 +45,14 @@ public class BhavcopyScheduler implements CommandLineRunner {
 
         for (LocalDate date : getLast6MonthsWeekdays()) {
             System.out.println("Starting the date : "+date.format(DateTimeFormatter.ISO_DATE));
-            nseBhavcopyService.fetchAndStoreBhavcopy(date);
+            try {
+                LocalDate yesterday = LocalDate.now().minusDays(1);
+                File csvFile = downloader.downloadBhavcopy(yesterday);
+                parser.parseAndSave(csvFile);
+                System.out.println("✅ Stored bhavcopy for " + yesterday);
+            } catch (Exception e) {
+                System.err.println("❌ Error in BhavcopyScheduler: " + e.getMessage()+ " for date "+date.format(DateTimeFormatter.ISO_DATE));
+            }
             System.out.println("End the date : "+date.format(DateTimeFormatter.ISO_DATE));
         }
     }
