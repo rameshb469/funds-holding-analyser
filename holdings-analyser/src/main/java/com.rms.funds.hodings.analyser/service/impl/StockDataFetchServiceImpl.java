@@ -25,6 +25,8 @@ public class StockDataFetchServiceImpl implements StockDataFetchService {
 
     private final StockInfoRepository stockRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private static final Long default_sector_id = 38L;
+    private static final Long default_industry_id = 180L;
 
     private static final String PYTHON_PATH = "python3";  // change if using Windows
 
@@ -108,6 +110,7 @@ public class StockDataFetchServiceImpl implements StockDataFetchService {
                 StockInfoEntity stock = StockInfoEntity.builder()
                         .symbol((String) s.get("symbol"))
                         .company((String) s.get("company"))
+                      //  .sector(default_sector_id) // default sector
                         .series((String) s.get("series"))
                         .paidUpValue(parseInt(s.get("paidUpValue")))
                         .marketLot(parseInt(s.get("marketLot")))

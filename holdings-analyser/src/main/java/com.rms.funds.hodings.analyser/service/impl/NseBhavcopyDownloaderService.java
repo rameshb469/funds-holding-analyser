@@ -14,14 +14,13 @@ import java.util.zip.ZipEntry;
 @Service
 public class NseBhavcopyDownloaderService implements BhavcopyDownloaderService {
 
-    private static final String BASE_URL = "https://www.nseindia.com/content/historical/EQUITIES";
+    private static final String BASE_URL = "https://nsearchives.nseindia.com/content/cm/";
+            //"https://www.nseindia.com/content/historical/EQUITIES";
 
+    //https://nsearchives.nseindia.com/content/cm/BhavCopy_NSE_CM_0_0_0_20251014_F_0000.csv.zip
     public File downloadBhavcopy(LocalDate date) throws IOException {
-        String yyyy = String.valueOf(date.getYear());
-        String mmm = date.format(DateTimeFormatter.ofPattern("MMM")).toUpperCase();
-        String ddmmmyyyy = date.format(DateTimeFormatter.ofPattern("ddMMMyyyy")).toUpperCase();
-
-        String url = String.format("%s/%s/%s/cm%sbhav.csv.zip", BASE_URL, yyyy, mmm, ddmmmyyyy);
+        String dateStr = date.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        String url = String.format("%sBhavCopy_NSE_CM_0_0_0_%s_F_0000.csv.zip", BASE_URL, dateStr);
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
@@ -46,4 +45,3 @@ public class NseBhavcopyDownloaderService implements BhavcopyDownloaderService {
         return tempFile;
     }
 }
-
