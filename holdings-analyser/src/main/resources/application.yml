@@ -2,13 +2,13 @@ spring:
   application:
     name: funds-holding-analyser
   profiles:
-    active : local
+    active : dev
   jpa:
     database: POSTGRESQL
     show-sql: true
   datasource:
     platform: postgres
-    url : jdbc:postgresql://${PGHOST:localhost}:5432/${PGDATABASE:funds-holding-analyser}
+    url : jdbc:postgresql://${PGHOST:localhost}:${PGPORT:5432}/${PGDATABASE:funds-holding-analyser}
     #url: jdbc:postgresql://${MF_HOLDING_HOST:localhost}:5432/${MF_HOLDING_DB:funds-holding-analyser}
     username: ${POSTGRES_USER:postgres}
     password: ${POSTGRES_PASSWORD:root}
