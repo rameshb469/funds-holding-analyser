@@ -39,7 +39,7 @@ public class BhavcopyScheduler implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-            fetchAndStoreBhavcopy();
+         //   fetchAndStoreBhavcopy();
 
 //        for (LocalDate date : getLast6MonthsWeekdays()) {
 //            System.out.println("Starting the date : "+date.format(DateTimeFormatter.ISO_DATE));

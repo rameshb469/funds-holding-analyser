@@ -66,7 +66,7 @@ public class FilterAttributeServiceImpl implements FilterAttributeService {
         return isAllow;
     }
 
-    @PostConstruct
+   // @PostConstruct
     public void init() {
         cachedFilterAttributes = FilterAttributes.builder()
                 .sectors(sectorRepository.findAll().stream().map(sector -> FilterAttributes.Attribute.builder()

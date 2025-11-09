@@ -1,8 +1,8 @@
 spring:
   application:
     name: funds-holding-analyser
-  profiles:
-    active : dev
+#  profiles:
+#    active : dev
   jpa:
     database: POSTGRESQL
     show-sql: true

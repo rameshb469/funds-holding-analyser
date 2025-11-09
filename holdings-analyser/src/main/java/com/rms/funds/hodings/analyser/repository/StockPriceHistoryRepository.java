@@ -16,4 +16,10 @@ public interface StockPriceHistoryRepository extends JpaRepository<StockPriceHis
     boolean existsByStockIdAndTradeDate(Long stockId, LocalDate tradeDate);
 
     boolean existsByStockAndTradeDate(StockInfoEntity stock, LocalDate tradeDate);
+
+    // Returns the latest history entry for the stock BEFORE the given date
+    StockPriceHistory findTopByStockIdAndTradeDateBeforeOrderByTradeDateDesc(Long stockId, LocalDate date);
+
+    // Fetch all histories for a specific trade date
+    List<StockPriceHistory> findByTradeDate(LocalDate tradeDate);
 }

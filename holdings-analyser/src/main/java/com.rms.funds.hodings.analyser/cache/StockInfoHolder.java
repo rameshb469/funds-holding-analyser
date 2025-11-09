@@ -147,6 +147,10 @@ public class StockInfoHolder {
         // INE202B01038 --> INE140A01024
         groupByIsinNumber.put("INE202B01038", groupByIsinNumber.get("INE140A01024"));
 
+        //INE1TAE01010 --> INE155A01022
+        // Tara motors to tata passenger
+        groupByIsinNumber.put("INE1TAE01010", groupByIsinNumber.get("INE155A01022"));
+
         // FREE_CASH --> INE020B08FJ3
         groupByIsinNumber.put("INE020B08FJ3", groupByIsinNumber.get("FREE_CASH"));
 
@@ -172,7 +176,8 @@ public class StockInfoHolder {
         //INE0NR623014
         groupByIsinNumber.put("INE0NR623014", groupByIsinNumber.get("FREE_CASH"));
 
-        List.of("INE671B01034", "INE549I01011", "INE066P20011", "INE643A20019").forEach(stock -> {
+        List.of("INE671B01034", "INE549I01011", "INE066P20011", "INE643A20019", "INE160A16QQ4",
+                "INE040A16FA5", "INE028A16HA6").forEach(stock -> {
             groupByIsinNumber.put(stock, groupByIsinNumber.get("FREE_CASH"));
         });
     }

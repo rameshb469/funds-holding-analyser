@@ -44,22 +44,29 @@ implements CommandLineRunner
     @Override
     public void run(String... args) throws Exception {
 
-        if (true) return;
+    //    if (true) return;
 
         List<MutualFundConfigEntity> configEntities = configRepository.findAll()
                 .stream()
-              //  .filter(mf -> mf.getMutualFundId() == 77)
+                .filter(mf -> mf.getFundHouse().getId().equals(3L))
+                .filter(x -> !x.getFundType().getName().equals("HYBRID"))
               //  .filter(x -> x.getDownloadUrl().contains("https://www.assetmanagement.hsbc.co.in/en/mutual-funds/investor-resources/-/media/files/attachments/india/mutual-funds/portfolios/document"))
                 .toList();
 
         for (MutualFundConfigEntity config : configEntities) {
-            List<Pair<String, LocalDate>> links = DateUtil.getDownloadLinks(config).stream().limit(1).toList();
+
+            if (config.getFundType().getName().equals("HYBRID")) {
+                System.out.println("Skipping HYBRID fund for config id : "+config.getId());
+                continue;
+            }
+
+            List<Pair<String, LocalDate>> links = DateUtil.getDownloadLinks(config).stream().limit(13).toList();
 
             int index = 0;
             List<Result> results = new ArrayList<>();
             for (var pair : links){
 
-               // if (index++ <= 1) continue;
+          //      if (index++ <= 1) continue;
 
                 if (!extractorJobRepository.exists(Example.of(ExtractorJobEntity.builder()
                                 .mutualFundConfigId(config.getId())
