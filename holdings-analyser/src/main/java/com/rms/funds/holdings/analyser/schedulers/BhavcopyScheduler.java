@@ -1,6 +1,7 @@
 package com.rms.funds.holdings.analyser.schedulers;
 
 // BhavcopyScheduler.java
+
 import com.rms.funds.holdings.analyser.service.BhavcopyDownloaderService;
 import com.rms.funds.holdings.analyser.service.BhavcopyParserService;
 import com.rms.funds.holdings.analyser.service.impl.NseBhavcopyService;
@@ -9,9 +10,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
 import java.io.File;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,18 +44,18 @@ public class BhavcopyScheduler implements CommandLineRunner {
     public void run(String... args) throws Exception {
          //   fetchAndStoreBhavcopy();
 
-//        for (LocalDate date : getLast6MonthsWeekdays()) {
-//            System.out.println("Starting the date : "+date.format(DateTimeFormatter.ISO_DATE));
-//            try {
-//              //  LocalDate yesterday = LocalDate.now().minusDays(1);
-//                File csvFile = downloader.downloadBhavcopy(date);
-//                parser.parseAndSave(csvFile);
-//                System.out.println("✅ Stored bhavcopy for " + date);
-//            } catch (Exception e) {
-//                System.err.println("❌ Error in BhavcopyScheduler: " + e.getMessage()+ " for date "+date.format(DateTimeFormatter.ISO_DATE));
-//            }
-//            System.out.println("End the date : "+date.format(DateTimeFormatter.ISO_DATE));
-//        }
+        for (LocalDate date : getLast6MonthsWeekdays()) {
+            System.out.println("Starting the date : "+date.format(DateTimeFormatter.ISO_DATE));
+            try {
+              //  LocalDate yesterday = LocalDate.now().minusDays(1);
+                File csvFile = downloader.downloadBhavcopy(date);
+                parser.parseAndSave(csvFile);
+                System.out.println("✅ Stored bhavcopy for " + date);
+            } catch (Exception e) {
+                System.err.println("❌ Error in BhavcopyScheduler: " + e.getMessage()+ " for date "+date.format(DateTimeFormatter.ISO_DATE));
+            }
+            System.out.println("End the date : "+date.format(DateTimeFormatter.ISO_DATE));
+        }
     }
 
     public List<LocalDate> getLast6MonthsWeekdays() {

@@ -1,7 +1,7 @@
 package com.rms.funds.holdings.analyser.service.impl;
 
-import com.rms.funds.holdings.analyser.entity.StockPriceHistory;
 import com.rms.funds.holdings.analyser.entity.StockInfoEntity;
+import com.rms.funds.holdings.analyser.entity.StockPriceHistory;
 import com.rms.funds.holdings.analyser.repository.StockInfoRepository;
 import com.rms.funds.holdings.analyser.repository.StockPriceHistoryRepository;
 import lombok.RequiredArgsConstructor;

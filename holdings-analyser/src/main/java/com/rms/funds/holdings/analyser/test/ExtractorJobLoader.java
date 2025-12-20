@@ -9,7 +9,6 @@ import com.rms.funds.holdings.analyser.model.ExcelDownloaderAttributes;
 import com.rms.funds.holdings.analyser.model.MutualFundStockHolding;
 import com.rms.funds.holdings.analyser.model.Result;
 import com.rms.funds.holdings.analyser.reader.FileDownloader;
-import com.rms.funds.hodings.analyser.repository.*;
 import com.rms.funds.holdings.analyser.repository.ExtractorJobRepository;
 import com.rms.funds.holdings.analyser.repository.MutualFundConfigRepository;
 import com.rms.funds.holdings.analyser.repository.MutualFundHoldingRepository;

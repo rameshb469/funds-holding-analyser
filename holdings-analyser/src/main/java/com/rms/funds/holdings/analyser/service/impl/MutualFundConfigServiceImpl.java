@@ -1,7 +1,6 @@
 package com.rms.funds.holdings.analyser.service.impl;
 
 import com.rms.funds.holdings.analyser.controller.dto.MutualFundConfigDto;
-import com.rms.funds.hodings.analyser.entity.*;
 import com.rms.funds.holdings.analyser.entity.ExtractorJobEntity;
 import com.rms.funds.holdings.analyser.entity.MutualFundConfigEntity;
 import com.rms.funds.holdings.analyser.entity.MutualFundHouseEntity;

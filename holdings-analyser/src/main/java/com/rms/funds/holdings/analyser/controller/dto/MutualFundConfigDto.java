@@ -1,6 +1,5 @@
 package com.rms.funds.holdings.analyser.controller.dto;
 
-import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
