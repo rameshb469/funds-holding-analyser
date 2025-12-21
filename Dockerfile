@@ -14,8 +14,8 @@ WORKDIR /app
 COPY gradle gradle
 COPY build.gradle settings.gradle ./
 COPY holdings-analyser holdings-analyser
-
-# Copy frontend build output into backend static resources
+# Ensure frontend is available for Gradle npm tasks (some builds expect /app/frontend)
+COPY frontend /app/frontend
 RUN mkdir -p holdings-analyser/src/main/resources/static
 COPY --from=frontend-build /frontend/dist holdings-analyser/src/main/resources/static
 

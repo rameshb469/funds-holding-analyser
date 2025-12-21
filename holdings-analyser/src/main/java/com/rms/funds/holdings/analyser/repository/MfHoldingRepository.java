@@ -32,7 +32,7 @@ public interface MfHoldingRepository extends JpaRepository<MfHoldingEntity, Long
                                         @Param("prevDate") LocalDate prevDate);
 
     @Query("""
-        SELECT new com.rms.funds.hodings.analyser.controller.dto.SectorIndustryStockChangeDTO(
+        SELECT new com.rms.funds.holdings.analyser.controller.dto.SectorIndustryStockChangeDTO(
             sec.id, sec.name,
             ind.id, ind.name,
             s.id, s.company, s.symbol,
