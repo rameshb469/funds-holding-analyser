@@ -64,7 +64,7 @@ public class BseBhavcopyService implements BhavcopyService {
 //                price.setHighPrice(new BigDecimal(record.get("high").toString()));
 //                price.setLowPrice(new BigDecimal(record.get("low").toString()));
                 price.setClosePrice(new BigDecimal(record.get("close").toString()));
-                price.setVolume(Long.parseLong(record.get("volume").toString()));
+                price.setTotalTradingVolume(Long.parseLong(record.get("volume").toString()));
 
                 priceRepo.save(price);
             }

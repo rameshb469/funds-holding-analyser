@@ -2,6 +2,8 @@ package com.rms.funds.holdings.analyser.controller;
 
 import com.rms.funds.holdings.analyser.controller.dto.HoldingChangeMetricDto;
 import com.rms.funds.holdings.analyser.controller.dto.StockHoldingDto;
+import com.rms.funds.holdings.analyser.model.HoldingChangeMetricFilter;
+import com.rms.funds.holdings.analyser.model.MarketCapCategoryType;
 import com.rms.funds.holdings.analyser.service.StockHoldingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -23,8 +25,18 @@ public class StockHoldingController {
     }
 
     @GetMapping(value = "/metrics")
-    public HoldingChangeMetricDto getHoldingChangeMetrics(@RequestParam(name = "date", required = false)
-                                                              @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        return stockHoldingService.getHoldingChangeMetrics(date);
+    public HoldingChangeMetricDto getHoldingChangeMetrics(@RequestParam(value = "marketCapCategory", required = false) String marketCapCategory,
+                                                          @RequestParam(value = "sector", required = false) String sector,
+                                                          @RequestParam(value = "industry", required = false) String industry,
+                                                          @RequestParam(name = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+
+        return stockHoldingService.getHoldingChangeMetrics(HoldingChangeMetricFilter.builder()
+                        .date(date)
+                        .industryId(industry)
+                        .sectorId(sector)
+                        .marketCapCategory(MarketCapCategoryType.fromId(marketCapCategory))
+                .build());
     }
 }
+
+

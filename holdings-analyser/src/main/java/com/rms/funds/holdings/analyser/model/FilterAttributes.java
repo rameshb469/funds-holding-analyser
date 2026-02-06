@@ -22,6 +22,7 @@ public class FilterAttributes {
     private List<Attribute> fundNames;
     private List<Attribute> stockInfo;
     private List<LocalDate> dates;
+    private List<Attribute> marketCapCategories;
 
 
     @Builder(toBuilder = true)

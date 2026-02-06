@@ -34,10 +34,10 @@ public class StockPriceHistory {
 
     @Column(name = "close_price")
     private BigDecimal closePrice;
-
-    private Long volume;
-    private BigDecimal turnover;
-    private Long numberOfTrades;
+//
+//    private Long volume;
+//    private BigDecimal turnover;
+//    private Long numberOfTrades;
 
     private java.time.LocalDateTime createdAt;
     private java.time.LocalDateTime updatedAt;

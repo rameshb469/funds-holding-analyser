@@ -6,6 +6,7 @@ import com.rms.funds.holdings.analyser.entity.StockInfoEntity;
 import com.rms.funds.holdings.analyser.repository.StockInfoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.BufferedReader;
@@ -80,7 +81,7 @@ public class MarketCapUpdater implements CommandLineRunner {
                             .orElse(null);
 
                     if (stock != null) {
-                        stock.setMarketCap(data.get("marketCap") != null ? ((Number)data.get("marketCap")).longValue() : null);
+                     //   stock.setMarketCap(data.get("marketCap") != null ? ((Number)data.get("marketCap")).longValue() : null);
                         stock.setSharesOutstanding(data.get("sharesOutstanding") != null ? ((Number)data.get("sharesOutstanding")).longValue() : null);
                         stock.setTotalFloatingShares(data.get("floatShares") != null ? ((Number)data.get("floatShares")).longValue() : null);
                         stock.setMarketCapCategory((String) data.get("marketCapCategory"));

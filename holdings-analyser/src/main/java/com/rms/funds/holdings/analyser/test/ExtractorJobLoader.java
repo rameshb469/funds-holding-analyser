@@ -51,7 +51,7 @@ implements CommandLineRunner
 
         List<MutualFundConfigEntity> configEntities = configRepository.findAll()
                 .stream()
-                .filter(mf -> mf.getFundHouse().getId().equals(12L))
+              //  .filter(mf -> mf.getFundHouse().getId().equals(12L))
             //    .filter(mf -> mf.getMutualFundId().equals(155L))
                 .filter(x -> !x.getFundType().getName().equals("HYBRID"))
               //  .filter(x -> x.getDownloadUrl().contains("https://www.assetmanagement.hsbc.co.in/en/mutual-funds/investor-resources/-/media/files/attachments/india/mutual-funds/portfolios/document"))
@@ -71,7 +71,7 @@ implements CommandLineRunner
                     continue;
                 }
 
-                List<Pair<String, LocalDate>> links = DateUtil.getDownloadLinks(config).stream().limit(13).toList();
+                List<Pair<String, LocalDate>> links = DateUtil.getDownloadLinks(config).stream().limit(1).toList();
 
                 int index = 0;
                 for (var pair : links){

@@ -11,4 +11,12 @@ public class NumberUtil {
             return Optional.empty();
         }
     }
+
+    public static Optional<Long> safeLong(String number){
+        try{
+            return Optional.of(Long.parseLong(number));
+        }catch (Exception e){
+            return Optional.empty();
+        }
+    }
 }

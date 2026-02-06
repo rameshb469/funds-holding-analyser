@@ -9,7 +9,8 @@ const FilterPanel = ({ isOpen, onClose, onFilterChange }) => {
     fundType: [],
     mfName: [],
     stockInfo: [],
-    dates: []
+    dates: [],
+    mktCategory: []
   });
 
   const [selectedSector, setSelectedSector] = useState(null);
@@ -17,12 +18,14 @@ const FilterPanel = ({ isOpen, onClose, onFilterChange }) => {
   const [selectedFundType, setSelectedFundType] = useState(null);
   const [selectedMfName, setSelectedMfName] = useState(null);
   const [selectedStock, setSelectedStock] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(null); // ✅ new state
+  const [selectedDate, setSelectedDate] = useState(null); // local state only
+  const [selectedMktCategory, setSelectedMktCategory] = useState(null); // local state for market cap
 
   const [industryOptions, setIndustryOptions] = useState([]);
   const [fundNameOptions, setFundNameOptions] = useState([]);
   const [stockOptions, setStockOptions] = useState([]);
-  const [dateOptions, setDateOptions] = useState([]); // ✅ new state
+  const [dateOptions, setDateOptions] = useState([]);
+  const [mktCategoryOptions, setMktCategoryOptions] = useState([]);
 
   // Fetch filters from API
   useEffect(() => {
@@ -41,22 +44,31 @@ const FilterPanel = ({ isOpen, onClose, onFilterChange }) => {
 
         const dates = data.dates?.map(d => ({ value: d, label: d })) || [];
 
+        // map market cap categories from API
+        const mktCats = data.marketCapCategories?.map(c => ({
+          value: c.id,
+          label: c.name,
+          metaInfo: c.metaInfo
+        })) || [];
+
         setFilters({
           sector: data.sectors?.map(s => ({ value: s.id, label: s.description })) || [],
           industry: data.industry?.map(i => ({ value: i.id, label: i.description, metaInfo: i.metaInfo })) || [],
           fundType: data.fundTypes?.map(f => ({ value: f.id, label: f.description })) || [],
           mfName: data.fundNames?.map(m => ({ value: m.id, label: m.name, metaInfo: m.metaInfo })) || [],
           stockInfo: stocks,
-          dates: dates
+          dates: dates,
+          mktCategory: mktCats
         });
 
-        setStockOptions(stocks); // ✅ default all stocks
+        setStockOptions(stocks); // default all stocks
         setDateOptions(dates);
+        setMktCategoryOptions(mktCats);
 
-        // ✅ Default first date selection
+        // Default first date selection (local only)
         if (dates.length > 0) {
           setSelectedDate(dates[0]);
-          onFilterChange('dates', dates[0]);
+          // do not propagate to parent now; Apply will send the selection
         }
       } catch (err) {
         console.error("Failed to fetch filters", err);
@@ -64,9 +76,9 @@ const FilterPanel = ({ isOpen, onClose, onFilterChange }) => {
     };
 
     fetchFilters();
-  }, [onFilterChange]);
+  }, []);
 
-  // Update industries & stocks when sector changes
+  // Update industries & stocks when sector changes (local)
   useEffect(() => {
     if (selectedSector) {
       setIndustryOptions(
@@ -77,13 +89,13 @@ const FilterPanel = ({ isOpen, onClose, onFilterChange }) => {
       );
     } else {
       setIndustryOptions([]);
-      setStockOptions(filters.stockInfo); // ✅ fallback: all stocks
+      setStockOptions(filters.stockInfo); // fallback: all stocks
     }
     setSelectedIndustry(null);
     setSelectedStock(null);
   }, [selectedSector, filters.industry, filters.stockInfo]);
 
-  // Update stocks when industry changes
+  // Update stocks when industry changes (local)
   useEffect(() => {
     if (selectedIndustry) {
       setStockOptions(
@@ -94,12 +106,12 @@ const FilterPanel = ({ isOpen, onClose, onFilterChange }) => {
         filters.stockInfo.filter(st => String(st.metaInfo?.sector) === String(selectedSector.value))
       );
     } else {
-      setStockOptions(filters.stockInfo); // ✅ fallback: all stocks
+      setStockOptions(filters.stockInfo); // fallback: all stocks
     }
     setSelectedStock(null);
   }, [selectedIndustry, selectedSector, filters.stockInfo]);
 
-  // Update fund names when fundType changes
+  // Update fund names when fundType changes (local)
   useEffect(() => {
     if (selectedFundType) {
       setFundNameOptions(
@@ -111,16 +123,32 @@ const FilterPanel = ({ isOpen, onClose, onFilterChange }) => {
     setSelectedMfName(null);
   }, [selectedFundType, filters.mfName]);
 
-  // Trigger effect whenever selectedDate changes
-  useEffect(() => {
-    if (selectedDate) {
-      console.log("Date changed to:", selectedDate);
+  // Only propagate when user clicks Apply
+  const handleApply = () => {
+    onFilterChange('apply', {
+      dates: selectedDate,
+      sector: selectedSector,
+      industry: selectedIndustry,
+      fundType: selectedFundType,
+      mfName: selectedMfName,
+      stockInfo: selectedStock,
+      mktCategory: selectedMktCategory
+    });
+  };
 
-      // Call parent callback automatically
-      onFilterChange('dates', selectedDate);
-    }
-  }, [selectedDate, onFilterChange]);
-
+  // Clear only local selections; parent will be updated when user clicks Apply
+  const handleClearAll = () => {
+    setSelectedDate(dateOptions.length > 0 ? dateOptions[0] : null);
+    setSelectedSector(null);
+    setSelectedIndustry(null);
+    setSelectedFundType(null);
+    setSelectedMfName(null);
+    setSelectedStock(null);
+    setSelectedMktCategory(null);
+    setIndustryOptions([]);
+    setFundNameOptions([]);
+    setStockOptions(filters.stockInfo);
+  };
 
   return (
     <div
@@ -139,7 +167,7 @@ const FilterPanel = ({ isOpen, onClose, onFilterChange }) => {
       {/* Filters */}
       <div className="p-4 space-y-4 text-sm overflow-y-auto h-[calc(100%-60px)]">
 
-        {/* Date Dropdown (new) */}
+        {/* Date Dropdown (local) */}
         <div>
           <label className="block font-medium text-gray-700 mb-1">Date</label>
          <Select
@@ -147,7 +175,6 @@ const FilterPanel = ({ isOpen, onClose, onFilterChange }) => {
            value={selectedDate}
            onChange={(v) => {
              setSelectedDate(v);
-             onFilterChange('dates', v);
            }}
            className="text-sm"
          />
@@ -161,7 +188,6 @@ const FilterPanel = ({ isOpen, onClose, onFilterChange }) => {
             value={selectedSector}
             onChange={(v) => {
               setSelectedSector(v);
-              onFilterChange('sector', v);
             }}
             className="text-sm"
           />
@@ -175,7 +201,6 @@ const FilterPanel = ({ isOpen, onClose, onFilterChange }) => {
             value={selectedIndustry}
             onChange={(v) => {
               setSelectedIndustry(v);
-              onFilterChange('industry', v);
             }}
             className="text-sm"
           />
@@ -189,7 +214,19 @@ const FilterPanel = ({ isOpen, onClose, onFilterChange }) => {
             value={selectedFundType}
             onChange={(v) => {
               setSelectedFundType(v);
-              onFilterChange('fundType', v);
+            }}
+            className="text-sm"
+          />
+        </div>
+
+        {/* Market Cap Category (local) */}
+        <div>
+          <label className="block font-medium text-gray-700 mb-1">Market Cap Category</label>
+          <Select
+            options={mktCategoryOptions}
+            value={selectedMktCategory}
+            onChange={(v) => {
+              setSelectedMktCategory(v);
             }}
             className="text-sm"
           />
@@ -203,7 +240,6 @@ const FilterPanel = ({ isOpen, onClose, onFilterChange }) => {
             value={selectedMfName}
             onChange={(v) => {
               setSelectedMfName(v);
-              onFilterChange('mfName', v);
             }}
             className="text-sm"
           />
@@ -217,7 +253,6 @@ const FilterPanel = ({ isOpen, onClose, onFilterChange }) => {
             value={selectedStock}
             onChange={(v) => {
               setSelectedStock(v);
-              onFilterChange('stockInfo', v);
             }}
             className="text-sm"
           />
@@ -226,33 +261,13 @@ const FilterPanel = ({ isOpen, onClose, onFilterChange }) => {
         {/* Buttons */}
         <div className="flex justify-between pt-4 border-t mt-2">
           <button
-            onClick={() =>
-              onFilterChange('apply', {
-                dates: selectedDate,
-                sector: selectedSector,
-                industry: selectedIndustry,
-                fundType: selectedFundType,
-                mfName: selectedMfName,
-                stockInfo: selectedStock
-              })
-            }
+            onClick={handleApply}
             className="bg-blue-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-blue-700 transition"
           >
             Apply
           </button>
           <button
-            onClick={() => {
-              setSelectedDate(dateOptions.length > 0 ? dateOptions[0] : null);
-              setSelectedSector(null);
-              setSelectedIndustry(null);
-              setSelectedFundType(null);
-              setSelectedMfName(null);
-              setSelectedStock(null);
-              setIndustryOptions([]);
-              setFundNameOptions([]);
-              setStockOptions(filters.stockInfo);
-              onFilterChange('clear');
-            }}
+            onClick={handleClearAll}
             className="text-sm text-gray-600 hover:text-red-500 transition"
           >
             Clear All

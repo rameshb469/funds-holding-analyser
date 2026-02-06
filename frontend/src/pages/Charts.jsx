@@ -54,6 +54,7 @@ const Charts = ({ quantityChangeByDates, mfDistribution, valuationChangeByDates 
           data={barData}
           xAxisDataKey="date"
           bars={bars}
+          reversed={true}
         />
       </section>
 

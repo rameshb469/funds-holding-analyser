@@ -26,4 +26,6 @@ public class FilterCriteria {
     private Set<String> symbols = new HashSet<>();
     @Builder.Default
     private Set<String> mfNames = new HashSet<>();
+    @Builder.Default
+    private Set<MarketCapCategoryType> marketCapCategories = new HashSet<>();
 }

@@ -182,6 +182,9 @@ public class StockInfoHolder {
         //INE0NR623014
         groupByIsinNumber.put("INE0NR623014", groupByIsinNumber.get("FREE_CASH"));
 
+        //INE2KCE01013 --> Kwality Limited
+        groupByIsinNumber.put("INE2KCE01013", groupByIsinNumber.get("FREE_CASH"));
+
         List.of("INE671B01034", "INE549I01011", "INE066P20011", "INE643A20019", "INE160A16QQ4",
                 "INE040A16FA5", "INE028A16HA6", "INE979B01015",
                 "INE2J8701016", "INE765D01022", "INE556F08KM1",

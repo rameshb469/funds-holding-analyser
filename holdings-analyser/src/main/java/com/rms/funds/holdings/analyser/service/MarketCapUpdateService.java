@@ -1,11 +1,11 @@
-package com.rms.funds.holdings.analyser.test;
+package com.rms.funds.holdings.analyser.service;
 
 import com.rms.funds.holdings.analyser.dto.McpRecordDto;
 import com.rms.funds.holdings.analyser.entity.StockInfoEntity;
+import com.rms.funds.holdings.analyser.model.MarketCapCategoryType;
 import com.rms.funds.holdings.analyser.repository.StockInfoRepository;
-import com.rms.funds.holdings.analyser.service.McpCsvLoader;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.CommandLineRunner;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -15,15 +15,19 @@ import java.util.function.Function;
 import static com.rms.funds.holdings.analyser.utility.AppConst._100K;
 import static java.util.stream.Collectors.toMap;
 
-//@Component
+@Component
 @RequiredArgsConstructor
-public class MarketCapUpdateService implements CommandLineRunner {
+@Slf4j
+public class MarketCapUpdateService {
 
     private final StockInfoRepository stockInfoRepository;
     private final McpCsvLoader mcpCsvLoader;
 
-    @Override
-    public void run(String... args) throws Exception {
+    private static final Set<String> INVALID_SYMBOLS = Set.of("WORTH",
+            "FSC", "MCDOWELL-N", "JPASSOCIAT", "CASH", "JETAIRWAYS", "544021", "530305",
+            "TV18BRDCST", "TECHIN", "GAYAPROJ", "BINANIIND", "JUBLINDS", "IBULHSGFIN", "SPICEJET");
+
+    public void updateMarketCap() throws Exception {
         // Implement market cap update logic here
 
         Map<String, StockInfoEntity> stockInfoEntityMap = stockInfoRepository.findAll().stream()
@@ -59,16 +63,53 @@ public class MarketCapUpdateService implements CommandLineRunner {
                                 .build()
                 );
             } else {
-                notUpdatedStocks.add(symbol);
+                if (!INVALID_SYMBOLS.contains(symbol)) {
+                    log.info("Market cap data not found for symbol: {}", symbol);
+                    notUpdatedStocks.add(symbol);
+                } else {
+                    log.info("Skipping invalid symbol: {}", symbol);
+                }
             }
 
         }
 
         stockInfoRepository.saveAll(updatedValues);
-        System.out.println("Total Stocks updated with market cap data: " + updatedValues.size() );
+        log.info("Total Stocks updated with market cap data: {}", updatedValues.size());
 
-        System.out.println("Stocks not updated due to missing market cap data: " + notUpdatedStocks);
+        log.info("Stocks not updated due to missing market cap data: {}", notUpdatedStocks);
 
-        System.out.println("MarketCapUpdateService is done...");
+        log.info("MarketCapUpdateService is done...");
+
+        updateRanks();
+    }
+
+
+    void updateRanks() {
+        List<StockInfoEntity> allStocks = stockInfoRepository.findAllByOrderByMarketCapDesc();
+        int rank = 1;
+        List<StockInfoEntity> updatedStocks = new ArrayList<>();
+        for (StockInfoEntity stock : allStocks) {
+            updatedStocks.add(
+                    stock.toBuilder()
+                            .marketCapCategory(getMarketCapCategory(rank).name())
+                            .rank(rank++)
+                            .build()
+            );
+        }
+        stockInfoRepository.saveAll(updatedStocks);
+        log.info("Updated market cap ranks for {} stocks", updatedStocks.size());
+    }
+
+
+    private MarketCapCategoryType getMarketCapCategory(int rank) {
+        if (rank <= 100) {
+            return MarketCapCategoryType.LARGE_CAP;
+        } else if (rank <= 250) {
+            return MarketCapCategoryType.MID_CAP;
+        } else if (rank <= 550) {
+            return MarketCapCategoryType.SMALL_CAP;
+        } else {
+            return MarketCapCategoryType.MIRCO_CAP;
+        }
     }
 }

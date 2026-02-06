@@ -1,0 +1,11 @@
+pandas
+numpy
+pyarrow
+sqlalchemy
+psycopg2-binary
+pyyaml
+scikit-learn
+lightgbm
+tensorflow==2.13.0
+pytest
+

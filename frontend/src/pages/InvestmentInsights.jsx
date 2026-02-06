@@ -29,16 +29,28 @@ const InvestmentInsights = () => {
   const [data, setData] = useState(null);
   const [filteredDate, setFilteredDate] = useState(null);
 
+  // new filter selections to be included in query params
+  const [selectedSector, setSelectedSector] = useState(null);
+  const [selectedIndustry, setSelectedIndustry] = useState(null);
+  const [selectedMktCategory, setSelectedMktCategory] = useState(null);
+
   useEffect(() => {
-    const url = filteredDate
-      ? `http://localhost:8080/api/investment-insights?date=${filteredDate}`
+    const params = new URLSearchParams();
+    if (filteredDate) params.append("date", filteredDate);
+    if (selectedSector) params.append("sectorId", selectedSector.value);
+    if (selectedIndustry) params.append("industryId", selectedIndustry.value);
+    if (selectedMktCategory) params.append("marketCapCategory", selectedMktCategory.value);
+
+    const query = params.toString();
+    const url = query
+      ? `http://localhost:8080/api/investment-insights?${query}`
       : "http://localhost:8080/api/investment-insights";
 
     fetch(url)
       .then((res) => res.json())
       .then(setData)
       .catch(console.error);
-  }, [filteredDate]);
+  }, [filteredDate, selectedSector, selectedIndustry, selectedMktCategory]);
 
   if (!data) return <div className="p-6">Loading...</div>;
 
@@ -56,6 +68,35 @@ const InvestmentInsights = () => {
     </ul>
   );
 
+  // Handle filter changes coming from FilterPanel
+  const handleFilterChange = (key, value) => {
+    if (key === "apply") {
+      // value is the full apply payload
+      const dateVal = value?.dates?.value ?? value?.dates ?? null;
+      const sectorVal = value?.sector ?? null; // option object or null
+      const industryVal = value?.industry ?? null;
+      const mktCatVal = value?.mktCategory ?? null;
+
+      setFilteredDate(dateVal);
+      setSelectedSector(sectorVal);
+      setSelectedIndustry(industryVal);
+      setSelectedMktCategory(mktCatVal);
+    } else if (key === "dates") {
+      setFilteredDate(value?.value ?? value ?? null);
+    } else if (key === "sector") {
+      setSelectedSector(value ?? null);
+    } else if (key === "industry") {
+      setSelectedIndustry(value ?? null);
+    } else if (key === "mktCategory") {
+      setSelectedMktCategory(value ?? null);
+    } else if (key === "clear") {
+      setFilteredDate(null);
+      setSelectedSector(null);
+      setSelectedIndustry(null);
+      setSelectedMktCategory(null);
+    }
+  };
+
   return (
     <div className="relative min-h-screen bg-gray-50">
       <Header />
@@ -70,11 +111,7 @@ const InvestmentInsights = () => {
       <FilterPanel
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
-        onFilterChange={(key, value) =>
-          key === "apply" && value?.dates
-            ? setFilteredDate(value?.dates.value || null)
-            : setFilteredDate(null)
-        }
+        onFilterChange={handleFilterChange}
       />
 
       <main className={`transition-all duration-300 ${isFilterOpen ? "ml-80" : "ml-0"} p-6`}>
@@ -82,6 +119,9 @@ const InvestmentInsights = () => {
         <p className="text-sm text-gray-500">
           Current: {data.currDate} | Previous: {data.prevDate}
           {filteredDate && <span className="ml-2 text-gray-400">Filtered: {filteredDate}</span>}
+          {selectedSector && <span className="ml-2 text-gray-400"> • Sector: {selectedSector.label}</span>}
+          {selectedIndustry && <span className="ml-2 text-gray-400"> • Industry: {selectedIndustry.label}</span>}
+          {selectedMktCategory && <span className="ml-2 text-gray-400"> • Market Cap: {selectedMktCategory.label}</span>}
         </p>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">

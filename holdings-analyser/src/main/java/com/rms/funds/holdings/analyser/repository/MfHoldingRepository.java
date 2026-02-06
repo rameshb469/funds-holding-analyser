@@ -26,10 +26,17 @@ public interface MfHoldingRepository extends JpaRepository<MfHoldingEntity, Long
     SELECT h.stockId, h.mfId, h.atDate, h.marketValue, h.netAssetPct
     FROM MfHoldingEntity h
     JOIN h.stockInfoEntity s
-    WHERE (h.atDate = :currentDate OR h.atDate = :prevDate) AND s.symbol <> 'CASH'
+    WHERE (h.atDate = :currentDate OR h.atDate = :prevDate)
+      AND s.symbol <> 'CASH'
+      AND (:marketCapCategory IS NULL OR s.marketCapCategory = :marketCapCategory)
+      AND (:sectorId IS NULL OR s.sector.id = :sectorId)
+      AND (:industryId IS NULL OR s.industry.id = :industryId)
     """)
     List<Object[]> findHoldingsForDates(@Param("currentDate") LocalDate currentDate,
-                                        @Param("prevDate") LocalDate prevDate);
+                                        @Param("prevDate") LocalDate prevDate,
+                                        @Param("marketCapCategory") String marketCapCategory,
+                                        @Param("sectorId") Long sectorId,
+                                        @Param("industryId") Long industryId);
 
     @Query("""
         SELECT new com.rms.funds.holdings.analyser.controller.dto.SectorIndustryStockChangeDTO(
@@ -64,8 +71,17 @@ public interface MfHoldingRepository extends JpaRepository<MfHoldingEntity, Long
     List<MfHoldingEntity> findByAtDate(@Param("atDate") LocalDate atDate);
 
     // Get holdings between two dates (for trend analysis)
-    @Query("SELECT h FROM MfHoldingEntity h WHERE h.atDate BETWEEN :from AND :to")
-    List<MfHoldingEntity> findByAtDateBetween(LocalDate from, LocalDate to);
+    @Query("SELECT h FROM MfHoldingEntity h " +
+            "    JOIN h.stockInfoEntity s" +
+            "    WHERE (h.atDate BETWEEN :from AND :to )" +
+            "      AND s.symbol <> 'CASH' " +
+            "      AND (:marketCapCategory IS NULL OR s.marketCapCategory = :marketCapCategory) " +
+            "      AND (:sectorId IS NULL OR s.sector.id = :sectorId) " +
+            "      AND (:industryId IS NULL OR s.industry.id = :industryId) ")
+    List<MfHoldingEntity> findByAtDateBetween(LocalDate from, LocalDate to,
+                                              @Param("marketCapCategory") String marketCapCategory,
+                                              @Param("sectorId") Long sectorId,
+                                              @Param("industryId") Long industryId);
 
     // Optional: Fetch by stockId and date range
     @Query("SELECT h FROM MfHoldingEntity h WHERE h.stockId = :stockId AND h.atDate BETWEEN :from AND :to")

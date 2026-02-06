@@ -4,8 +4,11 @@ import com.rms.funds.holdings.analyser.controller.dto.InvestmentInsightsResponse
 import com.rms.funds.holdings.analyser.controller.dto.StockInsight;
 import com.rms.funds.holdings.analyser.entity.MfHoldingEntity;
 import com.rms.funds.holdings.analyser.entity.StockInfoEntity;
+import com.rms.funds.holdings.analyser.model.HoldingChangeMetricFilter;
+import com.rms.funds.holdings.analyser.model.MarketCapCategoryType;
 import com.rms.funds.holdings.analyser.repository.MfHoldingRepository;
 import com.rms.funds.holdings.analyser.service.InvestmentInsightsService;
+import com.rms.funds.holdings.analyser.utility.NumberUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.rms.funds.holdings.analyser.model.MarketCapCategoryType.*;
+
 @Service
 @RequiredArgsConstructor
 public class InvestmentInsightsServiceImpl implements InvestmentInsightsService {
@@ -24,7 +29,8 @@ public class InvestmentInsightsServiceImpl implements InvestmentInsightsService 
     private static final double STABLE_WEIGHT_DELTA_PCT = 0.25;
 
     @Override
-    public InvestmentInsightsResponse getInsights(LocalDate asOfDate) {
+    public InvestmentInsightsResponse getInsights(HoldingChangeMetricFilter filter) {
+        LocalDate asOfDate = filter.getDate();
         // 1. Determine latest date if null
         if (asOfDate == null) {
             asOfDate = holdingRepository.findAll().stream()
@@ -33,9 +39,15 @@ public class InvestmentInsightsServiceImpl implements InvestmentInsightsService 
                     .orElseThrow(() -> new IllegalArgumentException("Unable to fetch last date reports"));
         }
 
+
+        // call repository with optional filters
+        String marketCapCategory = filter.getMarketCapCategory() != null ? filter.getMarketCapCategory().name() : null;
+        Long sectorId = NumberUtil.safeLong(filter.getSectorId()).orElse(null);
+        Long industryId = NumberUtil.safeLong(filter.getIndustryId()).orElse(null);
+
         // 2. Load last 6 months of data
         LocalDate sixMonthsAgo = asOfDate.minusMonths(3).withDayOfMonth(1);
-        List<MfHoldingEntity> last6Months = holdingRepository.findByAtDateBetween(sixMonthsAgo, asOfDate);
+        List<MfHoldingEntity> last6Months = holdingRepository.findByAtDateBetween(sixMonthsAgo, asOfDate, marketCapCategory, sectorId, industryId);
 
         // 3. Group holdings by stock
         Map<Long, List<MfHoldingEntity>> stockHoldingsMap = last6Months.stream()
@@ -129,9 +141,9 @@ public class InvestmentInsightsServiceImpl implements InvestmentInsightsService 
             int score = 0;
 
             // Strong Exposure
-            if (("LargeCap".equals(s.getMarketCapCategory()) && netAssetCurr >= 3.0)
-                    || ("MidCap".equals(s.getMarketCapCategory()) && netAssetCurr >= 2.0)
-                    || ("SmallCap".equals(s.getMarketCapCategory()) && netAssetCurr >= 1.0)) {
+            if ((LARGE_CAP.name().equals(s.getMarketCapCategory()) && netAssetCurr >= 3.0)
+                    || (MID_CAP.name().equals(s.getMarketCapCategory()) && netAssetCurr >= 2.0)
+                    || (SMALL_CAP.name().equals(s.getMarketCapCategory()) && netAssetCurr >= 1.0)) {
                 signals.add("Strong Exposure");
                 score += 3;
             }

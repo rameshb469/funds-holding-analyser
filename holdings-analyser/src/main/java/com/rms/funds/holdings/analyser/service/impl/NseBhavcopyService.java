@@ -45,9 +45,9 @@ public class NseBhavcopyService implements BhavcopyService {
                     price.setOpenPrice(new BigDecimal(record.getOpen()));
                     price.setHighPrice(new BigDecimal(record.getHigh()));
                     price.setLowPrice(new BigDecimal(record.getLow()));
-                    price.setClosePrice(new BigDecimal(record.getClose()));
-                    price.setVolume(Long.parseLong(record.getVolume()));
-                    price.setNumberOfTrades(Long.parseLong(record.getNumberOfTrades()));
+//                    price.setClosePrice(new BigDecimal(record.getClose()));
+//                    price.setTotalTradingVolume(Long.parseLong(record.getVolume()));
+//                    price.setTotalTradedValue(Long.parseLong(record.getNumberOfTrades()));
                     price.setCreatedAt(LocalDateTime.now());
                     priceRepo.save(price);
                 }

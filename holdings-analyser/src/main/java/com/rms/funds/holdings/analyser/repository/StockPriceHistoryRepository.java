@@ -22,4 +22,7 @@ public interface StockPriceHistoryRepository extends JpaRepository<StockPriceHis
 
     // Fetch all histories for a specific trade date
     List<StockPriceHistory> findByTradeDate(LocalDate tradeDate);
+
+    // Fetch all histories within an inclusive date range
+    List<StockPriceHistory> findByTradeDateBetween(LocalDate start, LocalDate end);
 }

@@ -15,4 +15,9 @@ public interface StockInfoRepository extends JpaRepository<StockInfoEntity, Long
 
     // Fetch all stocks where marketCap is null
     List<StockInfoEntity> findByMarketCapCategoryIsNull();
+
+    // Return top N stocks by market cap descending; using Spring Data derived query
+    List<StockInfoEntity> findTop1000ByOrderByMarketCapDesc();
+
+    List<StockInfoEntity> findAllByOrderByMarketCapDesc();
 }

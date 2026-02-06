@@ -6,10 +6,12 @@ import com.rms.funds.holdings.analyser.entity.IndustryEntity;
 import com.rms.funds.holdings.analyser.entity.MfHoldingEntity;
 import com.rms.funds.holdings.analyser.entity.SectorEntity;
 import com.rms.funds.holdings.analyser.entity.StockInfoEntity;
+import com.rms.funds.holdings.analyser.model.HoldingChangeMetricFilter;
 import com.rms.funds.holdings.analyser.model.IdName;
 import com.rms.funds.holdings.analyser.repository.MfHoldingRepository;
 import com.rms.funds.holdings.analyser.repository.StockInfoRepository;
 import com.rms.funds.holdings.analyser.service.StockHoldingService;
+import com.rms.funds.holdings.analyser.utility.NumberUtil;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.tuple.Pair;
@@ -106,7 +108,9 @@ public class StockHoldingServiceImpl implements StockHoldingService {
                                         .mfName(e.getMfEntity().getName())
                                         .quantity(e.getQuantity())
                                         .build())
-                                .toList())).toList());
+                                .toList()))
+                                .sorted(Comparator.comparing(Object::toString).reversed())
+                        .toList());
             }
 
             stockHoldingDtoBuilder.quantityChangeByDates(quantityChangeByDates);
@@ -125,7 +129,10 @@ public class StockHoldingServiceImpl implements StockHoldingService {
     }
 
     @Override
-    public HoldingChangeMetricDto getHoldingChangeMetrics(LocalDate currentDate) {
+    public HoldingChangeMetricDto getHoldingChangeMetrics(HoldingChangeMetricFilter filter) {
+
+        LocalDate currentDate = filter.getDate();
+
         if (currentDate == null) {
             currentDate = mfHoldingRepository.findAll().stream().max(Comparator.comparing(MfHoldingEntity::getAtDate))
                     .map(MfHoldingEntity::getAtDate)
@@ -134,7 +141,12 @@ public class StockHoldingServiceImpl implements StockHoldingService {
         LocalDate prevDate = currentDate.minusMonths(1)
                 .withDayOfMonth(currentDate.minusMonths(1).lengthOfMonth());
 
-        List<Object[]> rows = mfHoldingRepository.findHoldingsForDates(currentDate, prevDate);
+        // call repository with optional filters
+        String marketCapCategory = filter.getMarketCapCategory() != null ? filter.getMarketCapCategory().name() : null;
+        Long sectorId = NumberUtil.safeLong(filter.getSectorId()).orElse(null);
+        Long industryId = NumberUtil.safeLong(filter.getIndustryId()).orElse(null);
+
+        List<Object[]> rows = mfHoldingRepository.findHoldingsForDates(currentDate, prevDate, marketCapCategory, sectorId, industryId);
 
         Map<Long, Double> mfAumCache = new HashMap<>();
         Map<LocalDate, Map<Long, ExposureData>> exposureByDate = new HashMap<>();
@@ -144,7 +156,7 @@ public class StockHoldingServiceImpl implements StockHoldingService {
             Long stockId = (Long) row[0];
             Long mfId = (Long) row[1];
             LocalDate date = (LocalDate) row[2];
-            double valuation = ((Double) row[3])*_100K;
+            double valuation = ((Double) row[3]) * _100K;
             Double netAssetPct = (Double) row[4];
 
             if (netAssetPct == null || netAssetPct == 0) continue;

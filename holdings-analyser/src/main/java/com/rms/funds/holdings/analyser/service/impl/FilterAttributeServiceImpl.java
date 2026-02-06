@@ -2,6 +2,7 @@ package com.rms.funds.holdings.analyser.service.impl;
 
 import com.rms.funds.holdings.analyser.model.FilterAttributes;
 import com.rms.funds.holdings.analyser.model.FilterCriteria;
+import com.rms.funds.holdings.analyser.model.MarketCapCategoryType;
 import com.rms.funds.holdings.analyser.repository.*;
 import com.rms.funds.holdings.analyser.service.FilterAttributeService;
 import jakarta.annotation.PostConstruct;
@@ -10,10 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +40,9 @@ public class FilterAttributeServiceImpl implements FilterAttributeService {
                 .stockInfo(getAttributes(cachedFilterAttributes.getStockInfo(), filterCriteria.getStocks(),
                         Map.of("sector", filterCriteria.getSectors(), "industry", filterCriteria.getIndustries())))
                 .dates(cachedFilterAttributes.getDates())
+                .marketCapCategories(getAttributes(cachedFilterAttributes.getMarketCapCategories(),
+                        filterCriteria.getMarketCapCategories().stream().map(Enum::toString).collect(java.util.stream.Collectors.toSet()),
+                        Collections.emptyMap()))
                 .build();
     }
 
@@ -101,6 +102,11 @@ public class FilterAttributeServiceImpl implements FilterAttributeService {
                                 )
                         .build()).toList())
                 .dates(mfHoldingRepository.findLast12Dates(PageRequest.of(0, 12)))
+                .marketCapCategories(Arrays.stream(MarketCapCategoryType.values())
+                        .map(category -> FilterAttributes.Attribute.builder()
+                        .id(category.name())
+                        .name(category.getDisplayName())
+                        .description(category.getDisplayName()).build()).toList())
                 .build();
     }
 }
