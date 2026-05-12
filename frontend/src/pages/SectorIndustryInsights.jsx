@@ -25,6 +25,7 @@ const SectorIndustryInsights = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [data, setData] = useState([]);
   const [filteredDate, setFilteredDate] = useState(null);
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
   useEffect(() => {
     const url = filteredDate
@@ -61,6 +62,44 @@ const SectorIndustryInsights = () => {
     } else if (key === "clear") {
       setFilteredDate(null);
     }
+  };
+
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const getSortedData = () => {
+    if (!sortConfig.key) return data;
+
+    const sorted = [...data].sort((a, b) => {
+      const aValue = a[sortConfig.key];
+      const bValue = b[sortConfig.key];
+
+      // Handle numeric values
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return sortConfig.direction === 'asc' ? aValue - bValue : bValue - aValue;
+      }
+
+      // Handle string values
+      const aStr = String(aValue).toLowerCase();
+      const bStr = String(bValue).toLowerCase();
+      return sortConfig.direction === 'asc'
+        ? aStr.localeCompare(bStr)
+        : bStr.localeCompare(aStr);
+    });
+
+    return sorted;
+  };
+
+  const getSortIndicator = (columnKey) => {
+    if (sortConfig.key !== columnKey) {
+      return ' ↕️';
+    }
+    return sortConfig.direction === 'asc' ? ' ↑' : ' ↓';
   };
 
   return (
@@ -217,17 +256,52 @@ const SectorIndustryInsights = () => {
             <table className="w-full text-sm text-left border">
               <thead className="bg-gray-100">
                 <tr>
-                  <th className="px-2 py-1">Sector</th>
-                  <th className="px-2 py-1">Industry</th>
-                  <th className="px-2 py-1">Stock</th>
-                  <th className="px-2 py-1">Symbol</th>
-                  <th className="px-2 py-1">Current Value</th>
-                  <th className="px-2 py-1">Prev Value</th>
-                  <th className="px-2 py-1">Change %</th>
+                  <th
+                    onClick={() => handleSort('sectorName')}
+                    className="px-2 py-1 cursor-pointer hover:bg-gray-200 transition"
+                  >
+                    Sector{getSortIndicator('sectorName')}
+                  </th>
+                  <th
+                    onClick={() => handleSort('industryName')}
+                    className="px-2 py-1 cursor-pointer hover:bg-gray-200 transition"
+                  >
+                    Industry{getSortIndicator('industryName')}
+                  </th>
+                  <th
+                    onClick={() => handleSort('stockName')}
+                    className="px-2 py-1 cursor-pointer hover:bg-gray-200 transition"
+                  >
+                    Stock{getSortIndicator('stockName')}
+                  </th>
+                  <th
+                    onClick={() => handleSort('stockSymbol')}
+                    className="px-2 py-1 cursor-pointer hover:bg-gray-200 transition"
+                  >
+                    Symbol{getSortIndicator('stockSymbol')}
+                  </th>
+                  <th
+                    onClick={() => handleSort('currentValue')}
+                    className="px-2 py-1 cursor-pointer hover:bg-gray-200 transition"
+                  >
+                    Current Value{getSortIndicator('currentValue')}
+                  </th>
+                  <th
+                    onClick={() => handleSort('prevValue')}
+                    className="px-2 py-1 cursor-pointer hover:bg-gray-200 transition"
+                  >
+                    Prev Value{getSortIndicator('prevValue')}
+                  </th>
+                  <th
+                    onClick={() => handleSort('changePct')}
+                    className="px-2 py-1 cursor-pointer hover:bg-gray-200 transition"
+                  >
+                    Change %{getSortIndicator('changePct')}
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {data.map((d) => (
+                {getSortedData().map((d) => (
                   <tr key={d.stockId} className="border-t">
                     <td className="px-2 py-1">{d.sectorName}</td>
                     <td className="px-2 py-1">{d.industryName}</td>

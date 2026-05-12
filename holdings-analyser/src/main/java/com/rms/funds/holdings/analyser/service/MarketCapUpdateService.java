@@ -6,6 +6,7 @@ import com.rms.funds.holdings.analyser.model.MarketCapCategoryType;
 import com.rms.funds.holdings.analyser.repository.StockInfoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -18,7 +19,7 @@ import static java.util.stream.Collectors.toMap;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class MarketCapUpdateService {
+public class MarketCapUpdateService  implements CommandLineRunner {
 
     private final StockInfoRepository stockInfoRepository;
     private final McpCsvLoader mcpCsvLoader;
@@ -111,5 +112,10 @@ public class MarketCapUpdateService {
         } else {
             return MarketCapCategoryType.MIRCO_CAP;
         }
+    }
+
+    @Override
+    public void run(String... args) throws Exception {
+            updateMarketCap();
     }
 }

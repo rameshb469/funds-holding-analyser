@@ -156,6 +156,8 @@ public class StockInfoHolder {
         //INE572A01028 --> INE572A01036
         groupByIsinNumber.put("INE572A01028", groupByIsinNumber.get("INE572A01036"));
 
+        //INE732I01013 --> INE1CDF01017  (angleOne to angel broking)
+        groupByIsinNumber.put("INE1CDF01017", groupByIsinNumber.get("INE732I01013"));
 
         // FREE_CASH --> INE020B08FJ3
         groupByIsinNumber.put("INE020B08FJ3", groupByIsinNumber.get("FREE_CASH"));
@@ -187,8 +189,8 @@ public class StockInfoHolder {
 
         List.of("INE671B01034", "INE549I01011", "INE066P20011", "INE643A20019", "INE160A16QQ4",
                 "INE040A16FA5", "INE028A16HA6", "INE979B01015", "INE775B01025", "INE261F16991",
-                "INE2J8701016", "INE765D01022", "INE556F08KM1", "INE261F16975",
-                "INE015B01018", "INE12UR01024").forEach(stock -> {
+                "INE2J8701016", "INE765D01022", "INE556F08KM1", "INE261F16975", "INE256D01014", "INE694L01019",
+                "INE015B01018", "INE12UR01024", "INE704J01044", "INE1CLE01013", "INE160A16UF9", "INE476A16G69").forEach(stock -> {
             groupByIsinNumber.put(stock, groupByIsinNumber.get("FREE_CASH"));
         });
     }

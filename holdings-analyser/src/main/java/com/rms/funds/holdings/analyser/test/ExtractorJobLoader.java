@@ -47,11 +47,11 @@ implements CommandLineRunner
     @Override
     public void run(String... args) throws Exception {
 
-     //   if (true) return;
+       if (true) return;
 
         List<MutualFundConfigEntity> configEntities = configRepository.findAll()
                 .stream()
-                .filter(mf -> mf.getFundHouse().getId().equals(3L))
+                .filter(mf -> mf.getFundHouse().getId().equals(12L))
             //    .filter(mf -> mf.getMutualFundId().equals(155L))
                 .filter(x -> !x.getFundType().getName().equals("HYBRID"))
               //  .filter(x -> x.getDownloadUrl().contains("https://www.assetmanagement.hsbc.co.in/en/mutual-funds/investor-resources/-/media/files/attachments/india/mutual-funds/portfolios/document"))
@@ -71,7 +71,7 @@ implements CommandLineRunner
                     continue;
                 }
 
-                List<Pair<String, LocalDate>> links = DateUtil.getDownloadLinks(config).stream().limit(2).toList();
+                List<Pair<String, LocalDate>> links = DateUtil.getDownloadLinks(config).stream().limit(3).toList();
 
                 int index = 0;
                 for (var pair : links){

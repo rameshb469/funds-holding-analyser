@@ -18,7 +18,7 @@ public class McpCsvLoader {
      * Load the default file `mcp19122025.csv` from the classpath (resources).
      */
     public List<McpRecordDto> loadAll() throws IOException {
-        return loadFromResource("mcap19122025.csv");
+        return loadFromResource("mcap12052026.csv");
     }
 
     public List<McpRecordDto> loadFromResource(String resourceName) throws IOException {

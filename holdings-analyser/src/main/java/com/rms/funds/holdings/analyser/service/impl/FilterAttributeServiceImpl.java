@@ -51,7 +51,12 @@ public class FilterAttributeServiceImpl implements FilterAttributeService {
     private List<FilterAttributes.Attribute> getAttributes(List<FilterAttributes.Attribute> attributes,
                                                            Set<String> selected,
                                                            Map<String, Set<String>> parentDepends) {
+        if (attributes == null) {
+            return Collections.emptyList();
+        }
+
         return attributes.stream()
+                .filter(Objects::nonNull)
                 .filter(x -> applyFilterCriteria(x, selected, parentDepends))
                 .toList();
     }
@@ -94,15 +99,15 @@ public class FilterAttributeServiceImpl implements FilterAttributeService {
                         .description(fund.getDescription())
                         .metaInfo(Map.of("type", fund.getFundTypeId()+""))
                         .build()).toList())
-//                .stockInfo(stockInfoRepository.findAll().stream().map(stock -> FilterAttributes.Attribute.builder()
-//                        .id(stock.getId().toString())
-//                        .name(stock.getCompany())
-//                        .description(stock.getSymbol())
-//                        .metaInfo(Map.of(
-//                                "sector", Optional.ofNullable(stock.getSector().getId()).orElse(default_sector_id)+"",
-//                                "industry", Optional.ofNullable(stock.getIndustry().getId()).orElse(default_industry_id)+"" )
-//                                )
-//                        .build()).toList())
+                .stockInfo(stockInfoRepository.findAll().stream().map(stock -> FilterAttributes.Attribute.builder()
+                        .id(stock.getId().toString())
+                        .name(stock.getCompany())
+                        .description(stock.getSymbol())
+                        .metaInfo(Map.of(
+                                "sector", Optional.ofNullable(stock.getSector().getId()).orElse(default_sector_id)+"",
+                                "industry", Optional.ofNullable(stock.getIndustry().getId()).orElse(default_industry_id)+"" )
+                                )
+                        .build()).toList())
                 .dates(mfHoldingRepository.findLast12Dates(PageRequest.of(0, 12)))
                 .marketCapCategories(Arrays.stream(MarketCapCategoryType.values())
                         .map(category -> FilterAttributes.Attribute.builder()
