@@ -12,6 +12,7 @@ export default function Header() {
   const reportsRef = useRef(null);
 
   const navLinks = [
+    { name: 'Volume Report', path: '/reports/volume' },
     { name: "Dashboard", path: "/" },
     { name: "StockView", path: "/stocks/678" },
     { name: 'Holding Change', path : "/reports/holding-change"},

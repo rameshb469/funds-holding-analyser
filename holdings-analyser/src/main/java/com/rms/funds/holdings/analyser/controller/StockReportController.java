@@ -1,5 +1,8 @@
 package com.rms.funds.holdings.analyser.controller;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.rms.funds.holdings.analyser.dto.BacktestEntryDto;
 import com.rms.funds.holdings.analyser.dto.StockVolumeReportDto;
 import com.rms.funds.holdings.analyser.entity.StockPriceHistory;
@@ -9,6 +12,10 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -151,6 +158,16 @@ public class StockReportController {
                 double score = (p.getVolumeStdDev() <= 0) ? p.getAvgVolume() : p.getAvgVolume() / p.getVolumeStdDev();
                 pm.put("score", score);
                 pm.put("lastClose", p.getLastClosePrice());
+                // include market cap as MKT_CAP for consistency with ML pipeline outputs
+                if (p.getMarketCap() != null) {
+                    try {
+                        pm.put("MKT_CAP", p.getMarketCap().doubleValue());
+                    } catch (Exception ex) {
+                        pm.put("MKT_CAP", p.getMarketCap());
+                    }
+                } else {
+                    pm.put("MKT_CAP", null);
+                }
 
                 java.math.BigDecimal fClose = null;
                 if (p.getStockId() != null) fClose = forwardCloseById.get(p.getStockId());
@@ -215,6 +232,149 @@ public class StockReportController {
         double perSide = tradeCostPctPerSide != null ? tradeCostPctPerSide : 0.001;
         Map<String, Object> res = reportService.backtestPortfolio(from, to, windowMonths, topN, perSide);
         return ResponseEntity.ok(res);
+    }
+
+    // New endpoint: return latest persisted backtest results JSON from ml/data/windows/backtest_results.json
+    @GetMapping("/backtest/latest")
+    public ResponseEntity<JsonNode> latestBacktest() {
+        Path p = Paths.get("ml", "data", "windows", "backtest_results.json");
+        if (!Files.exists(p)) {
+            return ResponseEntity.notFound().build();
+        }
+        ObjectMapper om = new ObjectMapper();
+        try {
+            JsonNode node = om.readTree(p.toFile());
+            return ResponseEntity.ok(node);
+        } catch (IOException e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+    // New endpoint: run the ML backtest pipeline (synchronous) and return results written to ml/data/windows/backtest_results.json
+    @PostMapping("/backtest/run")
+    public ResponseEntity<JsonNode> runBacktest(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @RequestParam(defaultValue = "3") int windowMonths,
+            @RequestParam(defaultValue = "10") int topN,
+            @RequestParam(defaultValue = "500") int nStocks,
+            @RequestParam(required = false) Double tradeCostPctPerSide,
+            @RequestParam(defaultValue = "B") String pipeline,
+            @RequestParam(defaultValue = "false") boolean useExistingWindows,
+            @RequestParam(defaultValue = "false") boolean runDbExtract
+    ) {
+        double perSide = tradeCostPctPerSide != null ? tradeCostPctPerSide : 0.001; // default 0.1%
+
+        // Optionally run DB extractor to refresh ml/data/raw/top_stocks.parquet and stock_history
+        if (runDbExtract) {
+            List<String> dbCmd = new ArrayList<>();
+            dbCmd.add("python3");
+            dbCmd.add("ml/preprocess/load_data.py");
+            ProcessBuilder dbPb = new ProcessBuilder(dbCmd);
+            dbPb.redirectErrorStream(true);
+            try {
+                Process dbProc = dbPb.start();
+                try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.InputStreamReader(dbProc.getInputStream()))) {
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        // consume output for logs; not appending to stdout buffer to keep memory small
+                    }
+                }
+                boolean finishedDb = dbProc.waitFor(10, java.util.concurrent.TimeUnit.MINUTES);
+                if (!finishedDb) {
+                    dbProc.destroyForcibly();
+                    ObjectNode resp = new ObjectMapper().createObjectNode();
+                    resp.put("status", "error");
+                    resp.put("message", "DB extraction timed out (10 minutes)");
+                    return ResponseEntity.status(500).body(resp);
+                }
+                if (dbProc.exitValue() != 0) {
+                    ObjectNode resp = new ObjectMapper().createObjectNode();
+                    resp.put("status", "error");
+                    resp.put("message", "DB extraction script exited with code " + dbProc.exitValue());
+                    return ResponseEntity.status(500).body(resp);
+                }
+            } catch (IOException | InterruptedException ex) {
+                ObjectNode resp = new ObjectMapper().createObjectNode();
+                resp.put("status", "exception");
+                resp.put("message", "Failed to run DB extractor: " + ex.getMessage());
+                return ResponseEntity.status(500).body(resp);
+            }
+        }
+
+        List<String> cmd = new ArrayList<>();
+        // prefer python3, fallback to python
+        cmd.add("python3");
+        cmd.add("ml/run_pipeline.py");
+        cmd.add("--n-stocks"); cmd.add(String.valueOf(nStocks));
+        cmd.add("--n-picks"); cmd.add(String.valueOf(topN));
+        cmd.add("--tc"); cmd.add(String.valueOf(perSide));
+        cmd.add("--top-n"); cmd.add(String.valueOf(topN));
+        if (pipeline != null && !pipeline.isEmpty()) { cmd.add("--pipeline"); cmd.add(pipeline); }
+        if (useExistingWindows) { cmd.add("--use-existing-windows"); }
+
+        ProcessBuilder pb = new ProcessBuilder(cmd);
+        pb.redirectErrorStream(true);
+
+        ObjectMapper om = new ObjectMapper();
+        StringBuilder stdout = new StringBuilder();
+        Process p = null;
+        try {
+            p = pb.start();
+            try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.InputStreamReader(p.getInputStream()))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    stdout.append(line).append('\n');
+                }
+            }
+            // wait for up to 10 minutes
+            boolean finished = p.waitFor(10, java.util.concurrent.TimeUnit.MINUTES);
+            if (!finished) {
+                p.destroyForcibly();
+                ObjectNode resp = om.createObjectNode();
+                resp.put("status", "timeout");
+                resp.put("message", "Pipeline execution timed out (10 minutes)");
+                resp.put("stdout", stdout.toString());
+                return ResponseEntity.status(202).body(resp);
+            }
+
+            int exit = p.exitValue();
+            Path resultPath = Paths.get("ml", "data", "windows", "backtest_results.json");
+            if (exit != 0) {
+                ObjectNode resp = om.createObjectNode();
+                resp.put("status", "error");
+                resp.put("exitCode", exit);
+                resp.put("stdout", stdout.toString());
+                // include file if available
+                if (Files.exists(resultPath)) {
+                    try {
+                        JsonNode node = om.readTree(resultPath.toFile());
+                        resp.set("results", node);
+                    } catch (IOException ignored) {
+                    }
+                }
+                return ResponseEntity.status(500).body(resp);
+            }
+
+            if (!Files.exists(resultPath)) {
+                ObjectNode resp = om.createObjectNode();
+                resp.put("status", "error");
+                resp.put("message", "Backtest finished but result file not found");
+                resp.put("stdout", stdout.toString());
+                return ResponseEntity.status(500).body(resp);
+            }
+
+            JsonNode node = om.readTree(resultPath.toFile());
+            return ResponseEntity.ok(node);
+
+        } catch (IOException | InterruptedException ex) {
+            if (p != null) p.destroyForcibly();
+            ObjectNode resp = om.createObjectNode();
+            resp.put("status", "exception");
+            resp.put("message", ex.getMessage());
+            resp.put("stdout", stdout.toString());
+            return ResponseEntity.status(500).body(resp);
+        }
     }
 
     // helper stats

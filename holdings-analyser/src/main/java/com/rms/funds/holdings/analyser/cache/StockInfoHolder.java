@@ -186,8 +186,8 @@ public class StockInfoHolder {
         groupByIsinNumber.put("INE2KCE01013", groupByIsinNumber.get("FREE_CASH"));
 
         List.of("INE671B01034", "INE549I01011", "INE066P20011", "INE643A20019", "INE160A16QQ4",
-                "INE040A16FA5", "INE028A16HA6", "INE979B01015",
-                "INE2J8701016", "INE765D01022", "INE556F08KM1",
+                "INE040A16FA5", "INE028A16HA6", "INE979B01015", "INE775B01025", "INE261F16991",
+                "INE2J8701016", "INE765D01022", "INE556F08KM1", "INE261F16975",
                 "INE015B01018", "INE12UR01024").forEach(stock -> {
             groupByIsinNumber.put(stock, groupByIsinNumber.get("FREE_CASH"));
         });

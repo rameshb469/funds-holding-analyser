@@ -18,6 +18,8 @@ import java.util.*;
 public class FilterAttributeServiceImpl implements FilterAttributeService {
 
     private static FilterAttributes cachedFilterAttributes = null;
+    private static final Long default_sector_id = 38L;
+    private static final Long default_industry_id = 180L;
 
     private final SectorRepository sectorRepository;
     private final IndustryRepository industryRepository;
@@ -92,15 +94,15 @@ public class FilterAttributeServiceImpl implements FilterAttributeService {
                         .description(fund.getDescription())
                         .metaInfo(Map.of("type", fund.getFundTypeId()+""))
                         .build()).toList())
-                .stockInfo(stockInfoRepository.findAll().stream().map(stock -> FilterAttributes.Attribute.builder()
-                        .id(stock.getId().toString())
-                        .name(stock.getCompany())
-                        .description(stock.getSymbol())
-                        .metaInfo(Map.of(
-                                "sector", stock.getSector().getId()+"",
-                                "industry", stock.getIndustry().getId()+"" )
-                                )
-                        .build()).toList())
+//                .stockInfo(stockInfoRepository.findAll().stream().map(stock -> FilterAttributes.Attribute.builder()
+//                        .id(stock.getId().toString())
+//                        .name(stock.getCompany())
+//                        .description(stock.getSymbol())
+//                        .metaInfo(Map.of(
+//                                "sector", Optional.ofNullable(stock.getSector().getId()).orElse(default_sector_id)+"",
+//                                "industry", Optional.ofNullable(stock.getIndustry().getId()).orElse(default_industry_id)+"" )
+//                                )
+//                        .build()).toList())
                 .dates(mfHoldingRepository.findLast12Dates(PageRequest.of(0, 12)))
                 .marketCapCategories(Arrays.stream(MarketCapCategoryType.values())
                         .map(category -> FilterAttributes.Attribute.builder()
