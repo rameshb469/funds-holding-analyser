@@ -25,18 +25,19 @@ const SectorIndustryInsights = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [data, setData] = useState([]);
   const [filteredDate, setFilteredDate] = useState(null);
+    const [filteredMktCategory, setMktCategory] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
   useEffect(() => {
     const url = filteredDate
-      ? `http://localhost:8080/api/sector-insights?date=${filteredDate}`
+      ? `http://localhost:8080/api/sector-insights?date=${filteredDate}&marketCapCategory=${filteredMktCategory}`
       : `http://localhost:8080/api/sector-insights`;
 
     fetch(url)
       .then((res) => res.json())
       .then(setData)
       .catch(console.error);
-  }, [filteredDate]);
+  }, [filteredDate, filteredMktCategory]);
 
   if (!data || data.length === 0) {
     return <div className="p-6">Loading...</div>;
@@ -57,8 +58,9 @@ const SectorIndustryInsights = () => {
   const strongestSector = sectorData.sort((a, b) => b.value - a.value)[0];
 
   const handleFilterChange = (key, value) => {
-    if (key === "apply" && value?.dates) {
+    if (key === "apply" ) {
       setFilteredDate(value?.dates.value || null);
+      setMktCategory(value?.mktCategory?.value || null);
     } else if (key === "clear") {
       setFilteredDate(null);
     }

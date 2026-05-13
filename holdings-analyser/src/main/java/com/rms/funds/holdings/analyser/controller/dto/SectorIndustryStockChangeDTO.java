@@ -23,4 +23,6 @@ public class SectorIndustryStockChangeDTO {
     private Double currentValue;
     private Double prevValue;
     private Double changePct;
+
+   // private String marketCapCategory;
 }
