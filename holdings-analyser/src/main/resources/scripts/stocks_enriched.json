@@ -1,0 +1,442 @@
+[
+  {
+    "symbol": "BAJFINANCE",
+    "marketCap": 6360554012672.0,
+    "sharesOutstanding": 6212388900.0,
+    "floatShares": 2640162674.0,
+    "rank": 1,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "EMBASSY",
+    "marketCap": 350644862976.0,
+    "sharesOutstanding": 947893743.0,
+    "floatShares": NaN,
+    "rank": 2,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "ISEC",
+    "marketCap": 290124890112.0,
+    "sharesOutstanding": 325160992.0,
+    "floatShares": 0.0,
+    "rank": 3,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "NXST",
+    "marketCap": 224889257984.0,
+    "sharesOutstanding": 1515000000.0,
+    "floatShares": NaN,
+    "rank": 4,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "MINDSPACE",
+    "marketCap": 210204901376.0,
+    "sharesOutstanding": 609183634.0,
+    "floatShares": NaN,
+    "rank": 5,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "BIRET",
+    "marketCap": 168636366848.0,
+    "sharesOutstanding": 640010513.0,
+    "floatShares": NaN,
+    "rank": 6,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "IWEL",
+    "marketCap": 123565260800.0,
+    "sharesOutstanding": 12047600.0,
+    "floatShares": 2871756.0,
+    "rank": 7,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "KIRLFER",
+    "marketCap": 76561973248.0,
+    "sharesOutstanding": 139272000.0,
+    "floatShares": 62593405.0,
+    "rank": 8,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "KOVAI",
+    "marketCap": 35290787840.0,
+    "sharesOutstanding": 10942300.0,
+    "floatShares": 4582291.0,
+    "rank": 9,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "SPICEJET",
+    "marketCap": 19138703360.0,
+    "sharesOutstanding": 601846016.0,
+    "floatShares": 866114712.0,
+    "rank": 10,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "JPASSOCIAT",
+    "marketCap": 9622014976.0,
+    "sharesOutstanding": 2454595640.0,
+    "floatShares": 1690636305.0,
+    "rank": 11,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "RBL",
+    "marketCap": 5759912960.0,
+    "sharesOutstanding": 7729870.0,
+    "floatShares": 2222937.0,
+    "rank": 12,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "JETAIRWAYS",
+    "marketCap": 3880486656.0,
+    "sharesOutstanding": 113597383.0,
+    "floatShares": 57930653.0,
+    "rank": 13,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "LGBFORGE",
+    "marketCap": 2844131840.0,
+    "sharesOutstanding": 238202000.0,
+    "floatShares": 62423337.0,
+    "rank": 14,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "RANEENGINE",
+    "marketCap": 2286089472.0,
+    "sharesOutstanding": 7234460.0,
+    "floatShares": 2676082.0,
+    "rank": 15,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "MBECL",
+    "marketCap": 2179997952.0,
+    "sharesOutstanding": 33333300.0,
+    "floatShares": 6982901.0,
+    "rank": 16,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "GENSOL",
+    "marketCap": 1516324736.0,
+    "sharesOutstanding": 38446368.0,
+    "floatShares": 17230001.0,
+    "rank": 17,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "VISESHINFO",
+    "marketCap": 1283308544.0,
+    "sharesOutstanding": 3774436655.0,
+    "floatShares": NaN,
+    "rank": 18,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "UMANGDAIRY",
+    "marketCap": 923343808.0,
+    "sharesOutstanding": 22003200.0,
+    "floatShares": 4880718.0,
+    "rank": 19,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "FCONSUMER",
+    "marketCap": 879669440.0,
+    "sharesOutstanding": 1997034643.0,
+    "floatShares": 1832093350.0,
+    "rank": 20,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "INDSWFTLTD",
+    "marketCap": 850927424.0,
+    "sharesOutstanding": 54164700.0,
+    "floatShares": 17965694.0,
+    "rank": 21,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "EROSMEDIA",
+    "marketCap": 756762368.0,
+    "sharesOutstanding": 95914119.0,
+    "floatShares": 76011967.0,
+    "rank": 22,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "BURNPUR",
+    "marketCap": 573588224.0,
+    "sharesOutstanding": 17224873.0,
+    "floatShares": 16281317.0,
+    "rank": 23,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "ARSHIYA",
+    "marketCap": 484795712.0,
+    "sharesOutstanding": 0.0,
+    "floatShares": 219115821.0,
+    "rank": 24,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "INFOMEDIA",
+    "marketCap": 394024256.0,
+    "sharesOutstanding": 50194172.0,
+    "floatShares": 17304391.0,
+    "rank": 25,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "PODDARHOUS",
+    "marketCap": 375411232.0,
+    "sharesOutstanding": 7266840.0,
+    "floatShares": 1900060.0,
+    "rank": 26,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "FLFL",
+    "marketCap": 336964032.0,
+    "sharesOutstanding": 0.0,
+    "floatShares": 170814997.0,
+    "rank": 27,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "EASTSILK",
+    "marketCap": 288200000.0,
+    "sharesOutstanding": 5000000.0,
+    "floatShares": 0.0,
+    "rank": 28,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "BLUECHIP",
+    "marketCap": 246104304.0,
+    "sharesOutstanding": 55304340.0,
+    "floatShares": 38837322.0,
+    "rank": 29,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "TECHIN",
+    "marketCap": 217324800.0,
+    "sharesOutstanding": 14326000.0,
+    "floatShares": 8750280.0,
+    "rank": 30,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "EDUCOMP",
+    "marketCap": 197704240.0,
+    "sharesOutstanding": 122467168.0,
+    "floatShares": 67517750.0,
+    "rank": 31,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "COMPINFO",
+    "marketCap": 144948032.0,
+    "sharesOutstanding": 85768064.0,
+    "floatShares": 46818213.0,
+    "rank": 32,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "SUULD",
+    "marketCap": 133274976.0,
+    "sharesOutstanding": 0.0,
+    "floatShares": 61528068.0,
+    "rank": 33,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "MARSHALL",
+    "marketCap": 119506080.0,
+    "sharesOutstanding": 0.0,
+    "floatShares": 20536165.0,
+    "rank": 34,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "FSC",
+    "marketCap": 106198312.0,
+    "sharesOutstanding": 43883598.0,
+    "floatShares": 24085721.0,
+    "rank": 35,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "MELSTAR",
+    "marketCap": 73764432.0,
+    "sharesOutstanding": 16925139.0,
+    "floatShares": 893541.0,
+    "rank": 36,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "SECURCRED",
+    "marketCap": 66521672.0,
+    "sharesOutstanding": 0.0,
+    "floatShares": 20593490.0,
+    "rank": 37,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "AMIORG",
+    "marketCap": NaN,
+    "sharesOutstanding": NaN,
+    "floatShares": NaN,
+    "rank": 38,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "526586",
+    "marketCap": NaN,
+    "sharesOutstanding": NaN,
+    "floatShares": NaN,
+    "rank": 39,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "WPIL",
+    "marketCap": NaN,
+    "sharesOutstanding": NaN,
+    "floatShares": NaN,
+    "rank": 40,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "DEEPENR",
+    "marketCap": NaN,
+    "sharesOutstanding": NaN,
+    "floatShares": NaN,
+    "rank": 41,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "IDFC",
+    "marketCap": NaN,
+    "sharesOutstanding": NaN,
+    "floatShares": NaN,
+    "rank": 42,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "ISMTLTD",
+    "marketCap": NaN,
+    "sharesOutstanding": NaN,
+    "floatShares": NaN,
+    "rank": 43,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "JUBLINDS",
+    "marketCap": NaN,
+    "sharesOutstanding": NaN,
+    "floatShares": NaN,
+    "rank": 44,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "OCCL",
+    "marketCap": NaN,
+    "sharesOutstanding": NaN,
+    "floatShares": NaN,
+    "rank": 45,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "SPYL",
+    "marketCap": NaN,
+    "sharesOutstanding": NaN,
+    "floatShares": NaN,
+    "rank": 46,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "TATAMTRDVR",
+    "marketCap": NaN,
+    "sharesOutstanding": NaN,
+    "floatShares": NaN,
+    "rank": 47,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "TCNSBRANDS",
+    "marketCap": NaN,
+    "sharesOutstanding": NaN,
+    "floatShares": NaN,
+    "rank": 48,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "TV18BRDCST",
+    "marketCap": NaN,
+    "sharesOutstanding": NaN,
+    "floatShares": NaN,
+    "rank": 49,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "UJJIVAN",
+    "marketCap": NaN,
+    "sharesOutstanding": NaN,
+    "floatShares": NaN,
+    "rank": 50,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "505890",
+    "marketCap": NaN,
+    "sharesOutstanding": NaN,
+    "floatShares": NaN,
+    "rank": 51,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "CASH",
+    "marketCap": NaN,
+    "sharesOutstanding": NaN,
+    "floatShares": NaN,
+    "rank": 52,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "URBANINFRA",
+    "marketCap": NaN,
+    "sharesOutstanding": NaN,
+    "floatShares": NaN,
+    "rank": 53,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "TGLINFRA",
+    "marketCap": NaN,
+    "sharesOutstanding": NaN,
+    "floatShares": NaN,
+    "rank": 54,
+    "marketCapCategory": "LargeCap"
+  },
+  {
+    "symbol": "508486",
+    "marketCap": NaN,
+    "sharesOutstanding": NaN,
+    "floatShares": NaN,
+    "rank": 55,
+    "marketCapCategory": "LargeCap"
+  }
+]

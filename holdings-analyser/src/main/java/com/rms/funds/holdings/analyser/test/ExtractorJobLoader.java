@@ -47,7 +47,7 @@ implements CommandLineRunner
     @Override
     public void run(String... args) throws Exception {
 
-     //  if (true) return;
+       if (true) return;
 
         List<MutualFundConfigEntity> configEntities = configRepository.findAll()
                 .stream()

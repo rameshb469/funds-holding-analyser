@@ -8,6 +8,7 @@ import HoldingChangeView from './pages/HoldingChangeView'
 import SectorIndustryInsights from './pages/SectorIndustryInsights'
 import InvestmentInsights from './pages/InvestmentInsights'
 import VolumeReport from './pages/VolumeReport'
+import Broker from './pages/Broker'
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path='/reports/volume' element={<VolumeReport/>} />
         <Route path="/sector-insights" element={<SectorIndustryInsights />} />
         <Route path="/investment-insights" element={<InvestmentInsights />} />
+        <Route path="/broker" element={<Broker />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>

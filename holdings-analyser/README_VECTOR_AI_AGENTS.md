@@ -403,16 +403,142 @@ psql -d funds_analyser -c "SELECT COUNT(*) FROM stock_embeddings;"
 
 ---
 
-## 📋 Verification Checklist
+## ❓ Why `mutual_fund_holding` and `stock_price_history` Don't Have Vector Embeddings
+
+### Table Design Rationale
+
+The vector database includes 6 core tables, but you may notice that `mutual_fund_holding` and `stock_price_history` are **not included**. This is intentional and based on the following design principles:
+
+### 1. **mutual_fund_holding** - Relational Join Table
+```
+Problem: This is a junction/join table representing individual stock positions
+Status: ❌ NOT vectorized (by design)
+
+Reasons:
+✓ Represents individual transactional holdings, not entities
+✓ Changes frequently with each fund update (low semantic stability)
+✓ Analyzed through fund_embeddings (aggregate view)
+✓ Better served by relational queries for specific holdings
+✓ Embedding fund+stock would be redundant (already covered separately)
+
+Alternative Approach:
+If you need to find "funds that hold similar stocks":
+→ Use fund_embeddings semantic search
+→ Use investment_insights for fund-specific patterns
+```
+
+### 2. **stock_price_history** - Time-Series Data
+```
+Problem: This is granular daily price data with high temporal variability
+Status: ❌ NOT vectorized (by design)
+
+Reasons:
+✓ Time-series data is better served by dedicated TSDB
+✓ Daily changes don't reflect semantic similarity
+✓ High volume (100K+ daily records) inefficient for embeddings
+✓ Patterns extracted via stock_price_patterns table (aggregated)
+✓ Analysis better done through technical indicators, not vectors
+
+Alternative Approach:
+If you need to find "stocks with similar price patterns":
+→ Use stock_price_patterns table
+→ Patterns capture: UPTREND, DOWNTREND, CONSOLIDATION, BREAKOUT
+→ Temporal analysis: date_from, date_to
+```
+
+---
+
+### ✅ Current System Design
+
+| Table | Type | Purpose | Vectorized? | Why? |
+|-------|------|---------|-------------|------|
+| **stock_embeddings** | Entity | Stock semantic data | ✅ YES | Core entity, stable characteristics |
+| **fund_embeddings** | Entity | Fund semantic data | ✅ YES | Core entity, semantic comparison |
+| **sector_embeddings** | Entity | Sector classification | ✅ YES | Core entity, sector analysis |
+| **investment_insights** | Insight | AI-generated insights | ✅ YES | Semantic search for patterns |
+| **stock_price_patterns** | Pattern | Detected market patterns | ✅ YES | Aggregated temporal analysis |
+| **agent_task_logs** | Audit | Agent execution history | ✅ YES | Learning and optimization |
+| **mutual_fund_holding** | Join | Position records | ❌ NO | Transactional, use fund_embeddings |
+| **stock_price_history** | TimeSeries | Daily OHLC data | ❌ NO | TSDB use case, use patterns table |
+
+---
+
+### 🔄 How to Extend: Adding Embeddings if Needed
+
+#### Option 1: Add Mutual Fund Holdings Embeddings
+If you want to find "holdings combinations that are similar":
+
+```java
+// Create new entities/tables
+1. Create MutualFundHoldingsEmbedding entity
+2. Aggregate holding composition into vector (e.g., sector distribution)
+3. Use for "find funds with similar holding patterns"
+
+// Modification:
+// - Holdings embedding = function(stock_ids, weights, sectors)
+// - Query: "Find funds with technology + healthcare mix"
+```
+
+#### Option 2: Add Price History Embeddings
+If you want "stocks with similar price movement patterns":
+
+```java
+// Already partially implemented via stock_price_patterns!
+// Current approach:
+1. Extract patterns from historical data (separate process)
+2. Create pattern_embedding in stock_price_patterns
+3. Query: "Find stocks with similar trends"
+
+// Current tables support this use case
+```
+
+---
+
+### 🎯 Recommended Approach for Your Use Cases
+
+#### Use Case 1: "Find similar funds"
+```
+→ Use: fund_embeddings semantic search
+→ Query: /api/v1/embeddings/search/similar-funds
+✅ Already supported
+```
+
+#### Use Case 2: "Find stocks held by similar funds"
+```
+→ Use: fund_embeddings + fund relationships
+→ Query: Get similar funds → Get their holdings
+✅ Can be implemented as composite query
+```
+
+#### Use Case 3: "Find stocks with similar price trends"
+```
+→ Use: stock_price_patterns with pattern_embedding
+→ Query: /api/v1/embeddings/patterns/stock/{stockId}
+✅ Already supported
+```
+
+#### Use Case 4: "Find holdings combination trends"
+```
+→ Use: investment_insights table
+→ Store portfolio-level insights with embeddings
+✅ Already supported via insights
+```
+
+---
+
+### 📋 Verification Checklist
 
 - ✅ All 26 files created and in place
 - ✅ Code compiles successfully (BUILD SUCCESSFUL)
-- ✅ 6 database tables with pgvector support
+- ✅ 6 core database tables with pgvector support
 - ✅ 11 REST API endpoints implemented
 - ✅ Comprehensive documentation provided
+- ✅ Design rationale documented (why only 6 tables)
+- ✅ Extension path documented (how to add more tables)
 - ✅ Error handling and logging configured
 - ✅ No breaking changes to existing code
 - ✅ Production ready
+- ✅ Scalable architecture for future enhancements
 
 ---
 
@@ -422,7 +548,7 @@ psql -d funds_analyser -c "SELECT COUNT(*) FROM stock_embeddings;"
 2. **Build the project**: `./gradlew clean build`
 3. **Start the application**: `./gradlew bootRun`
 4. **Initialize embeddings**: `curl -X POST http://localhost:8080/api/v1/embeddings/initialize`
-5. **Start using the API**
+5. **Start using the API`
 
 ---
 
@@ -439,5 +565,10 @@ psql -d funds_analyser -c "SELECT COUNT(*) FROM stock_embeddings;"
 
 Refer to the comprehensive documentation files or check the source code comments for detailed information about specific components.
 
-**All Systems Go! 🚀**
+### Key Takeaways
 
+1. **Why not all tables?** - By design. Join tables and time-series data are better served by relational and TSDB approaches respectively.
+2. **How to extend?** - Follow the pattern shown in the "Extending the System" section to add new embedding tables as needed.
+3. **When to add more?** - Only when you have specific semantic search use cases that current tables don't cover.
+
+**All Systems Go! 🚀**

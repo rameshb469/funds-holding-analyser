@@ -14,7 +14,7 @@ import java.util.*;
 @Component
 public class McpCsvLoader {
 
-    /**
+    /** qwen --resume 58a1ff25-19a2-480d-b06e-8727bf7ff097
      * Load the default file `mcp19122025.csv` from the classpath (resources).
      */
     public List<McpRecordDto> loadAll() throws IOException {

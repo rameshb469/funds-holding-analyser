@@ -39,7 +39,10 @@ dependencies {
     implementation 'com.pgvector:pgvector:0.1.1'
 
     // Spring AI for vector databases (milestone version)
-    implementation 'org.springframework.ai:spring-ai-pgvector-store-spring-boot-starter:0.8.1'
+    implementation('org.springframework.ai:spring-ai-pgvector-store-spring-boot-starter:0.8.1') {
+        exclude group: 'org.springframework.cloud', module: 'spring-cloud-function-context'
+        exclude group: 'org.springframework.cloud', module: 'spring-cloud-function-core'
+    }
 
     // flyway
     implementation 'org.flywaydb:flyway-core'

@@ -19,7 +19,8 @@ export default function Header() {
     { name: 'Sector Insights', path : "/sector-insights"},
     { name: 'Stock Insights', path : "/investment-insights"},
     { name: "Configurations", path: "/reports/configuration" },
-    { name: "Download Report", path: "/reports/download-urls" }
+    { name: "Download Report", path: "/reports/download-urls" },
+    { name: "Broker", path: "/broker" }
     // {
     //   name: "Reports",
     //   children: [

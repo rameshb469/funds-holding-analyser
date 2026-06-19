@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: funds-holding-analyser
+  jpa:
+    database: POSTGRESQL
+    show-sql: true
+  datasource:
+    platform: postgres
+  #  url : postgresql://postgres:IcOUYRmZhciPhLMtAOLKekbDOzbfDniE@shinkansen.proxy.rlwy.net:35183/railway
+    #PGPASSWORD=IcOUYRmZhciPhLMtAOLKekbDOzbfDniE psql -h shinkansen.proxy.rlwy.net -U postgres -p 35183 -d railway
+    url: jdbc:postgresql://shinkansen.proxy.rlwy.net:35183/railway
+    username: :postgres
+    password: IcOUYRmZhciPhLMtAOLKekbDOzbfDniE
+
+# Kite/Zerodha — flip sandbox: true to dry-run BUY/SELL without hitting the real broker.
+# Generate API key/secret at https://developers.kite.trade/apps
+kite:
+  api-key: ${KITE_API_KEY:}
+  api-secret: ${KITE_API_SECRET:}
+  base-url: https://api.kite.trade
+  login-redirect-uri: http://127.0.0.1:8080/api/broker/callback
+  sandbox: true

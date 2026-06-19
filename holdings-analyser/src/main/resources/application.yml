@@ -3,6 +3,9 @@ spring:
     name: funds-holding-analyser
 #  profiles:
 #    active : dev
+  autoconfigure:
+    exclude:
+      - org.springframework.ai.autoconfigure.vectorstore.pgvector.PgVectorStoreAutoConfiguration
   jpa:
     database: POSTGRESQL
     show-sql: true
@@ -40,5 +43,12 @@ internal:
   funds:
     vanguard:
       funds-links : https://investor.vanguard.com/investment-products/list/funddetail
+
+kite:
+  api-key: ${KITE_API_KEY:grovcnlnp7xoto0q}
+  api-secret: ${KITE_API_SECRET:u303rsedv6xg6rl67qod588vuyzoyh15}
+  base-url: https://api.kite.trade
+  login-redirect-uri: http://127.0.0.1:8080/api/broker/callback
+  sandbox: false
 
 
