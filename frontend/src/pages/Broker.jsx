@@ -47,6 +47,9 @@ function Broker() {
   const [stockOpen, setStockOpen] = useState(false);
   const [stocksLoading, setStocksLoading] = useState(false);
   const [selectedStock, setSelectedStock] = useState(null);
+  const [quote, setQuote] = useState(null);
+  const [quoteLoading, setQuoteLoading] = useState(false);
+  const [quoteError, setQuoteError] = useState(null);
 
   const refresh = async () => {
     try {
@@ -81,7 +84,7 @@ function Broker() {
         } else {
           setStockOptions([]);
         }
-      } catch (e) {
+      } catch {
         setStockOptions([]);
       } finally {
         setStocksLoading(false);
@@ -89,6 +92,48 @@ function Broker() {
     }, 200);
     return () => clearTimeout(handle);
   }, [stockQuery, stockOpen]);
+
+  useEffect(() => {
+    if (!selectedStock) {
+      setQuote(null);
+      setQuoteError(null);
+      return undefined;
+    }
+    let cancelled = false;
+    const fetchQuote = async () => {
+      setQuoteLoading(true);
+      try {
+        const exchange = selectedStock.exchange || 'NSE';
+        const symbol = selectedStock.symbol;
+        const res = await fetch(
+          `${API_BASE}/quote?exchange=${encodeURIComponent(exchange)}&symbol=${encodeURIComponent(symbol)}`
+        );
+        if (cancelled) return;
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          setQuote(null);
+          setQuoteError(body.message || `Quote fetch failed (status ${res.status})`);
+        } else {
+          const data = await res.json();
+          setQuote(data);
+          setQuoteError(null);
+        }
+      } catch (e) {
+        if (!cancelled) {
+          setQuote(null);
+          setQuoteError(e.message);
+        }
+      } finally {
+        if (!cancelled) setQuoteLoading(false);
+      }
+    };
+    fetchQuote();
+    const handle = setInterval(fetchQuote, 3000);
+    return () => {
+      cancelled = true;
+      clearInterval(handle);
+    };
+  }, [selectedStock]);
 
   const handleSelectStock = (stock) => {
     setSelectedStock(stock);
@@ -418,6 +463,132 @@ function Broker() {
               )}
             </div>
           </form>
+
+          {selectedStock && (
+            <div className="mt-4 border-t pt-4">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-semibold text-gray-700">
+                  Live quote · {selectedStock.symbol} ({selectedStock.exchange || 'NSE'})
+                </h3>
+                <span className="text-xs text-gray-500">
+                  {quoteLoading ? 'Refreshing…' : 'auto-refresh 3s'}
+                </span>
+              </div>
+              {quoteError && !quote && (
+                <div className="text-xs text-red-700 bg-red-50 border border-red-200 rounded px-2 py-1">
+                  {quoteError}
+                </div>
+              )}
+              {quote && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                  <div>
+                    <div className="text-gray-500 text-xs">Last price</div>
+                    <div className="text-lg font-semibold">
+                      {quote.lastPrice != null ? `₹${Number(quote.lastPrice).toFixed(2)}` : '—'}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-gray-500 text-xs">Change</div>
+                    <div
+                      className={`text-lg font-semibold ${
+                        quote.change == null
+                          ? 'text-gray-500'
+                          : quote.change >= 0
+                            ? 'text-green-700'
+                            : 'text-red-700'
+                      }`}
+                    >
+                      {quote.change != null
+                        ? `${quote.change >= 0 ? '+' : ''}${Number(quote.change).toFixed(2)}`
+                        : '—'}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-gray-500 text-xs">Open / High / Low</div>
+                    <div className="text-sm">
+                      {quote.ohlc?.open != null ? `₹${Number(quote.ohlc.open).toFixed(2)}` : '—'}
+                      {' / '}
+                      {quote.ohlc?.high != null ? `₹${Number(quote.ohlc.high).toFixed(2)}` : '—'}
+                      {' / '}
+                      {quote.ohlc?.low != null ? `₹${Number(quote.ohlc.low).toFixed(2)}` : '—'}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-gray-500 text-xs">Prev close</div>
+                    <div className="text-sm">
+                      {quote.ohlc?.close != null
+                        ? `₹${Number(quote.ohlc.close).toFixed(2)}`
+                        : '—'}
+                    </div>
+                  </div>
+                </div>
+              )}
+              {quote?.paidDataRequired && (
+                <div className="mt-3 p-2 rounded border border-amber-300 bg-amber-50 text-xs text-amber-800">
+                  Real-time market data (including the 5-level depth below) requires a
+                  paid <strong>Kite Connect</strong> plan (Connect ₹2,000/mo or Connect Plus
+                  ₹5,000/mo). The free Kite API tier does not include market depth or
+                  live LTP — this response was returned empty/null by the upstream.
+                  {quote.errorType && (
+                    <span className="block text-amber-700 mt-1">
+                      Upstream: {quote.errorType}
+                      {quote.message ? ` — ${quote.message}` : ''}
+                    </span>
+                  )}
+                </div>
+              )}
+              {quote?.depth && (quote.depth.buy?.length > 0 || quote.depth.sell?.length > 0) && (
+                <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <div className="text-gray-500 mb-1">Bids (buy)</div>
+                    <table className="w-full">
+                      <thead>
+                        <tr className="text-gray-500 text-left">
+                          <th className="py-0.5 pr-2">Price</th>
+                          <th className="py-0.5 pr-2">Qty</th>
+                          <th className="py-0.5">Orders</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(quote.depth.buy || []).slice(0, 5).map((l, i) => (
+                          <tr key={`b-${i}`} className="text-green-800">
+                            <td className="py-0.5 pr-2">
+                              {l.price != null ? `₹${Number(l.price).toFixed(2)}` : '—'}
+                            </td>
+                            <td className="py-0.5 pr-2">{l.quantity ?? '—'}</td>
+                            <td className="py-0.5">{l.orders ?? '—'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div>
+                    <div className="text-gray-500 mb-1">Asks (sell)</div>
+                    <table className="w-full">
+                      <thead>
+                        <tr className="text-gray-500 text-left">
+                          <th className="py-0.5 pr-2">Price</th>
+                          <th className="py-0.5 pr-2">Qty</th>
+                          <th className="py-0.5">Orders</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(quote.depth.sell || []).slice(0, 5).map((l, i) => (
+                          <tr key={`s-${i}`} className="text-red-800">
+                            <td className="py-0.5 pr-2">
+                              {l.price != null ? `₹${Number(l.price).toFixed(2)}` : '—'}
+                            </td>
+                            <td className="py-0.5 pr-2">{l.quantity ?? '—'}</td>
+                            <td className="py-0.5">{l.orders ?? '—'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </section>
 
         <section className="bg-white rounded shadow p-4">

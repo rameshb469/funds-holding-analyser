@@ -74,7 +74,7 @@ class KiteServiceImplTest {
 
     private KiteOrderRequestDto validOrder() {
         return KiteOrderRequestDto.builder()
-                .symbol("INFY")
+                .tradingsymbol("INFY")
                 .exchange("NSE")
                 .transactionType("BUY")
                 .orderType("MARKET")
@@ -187,7 +187,7 @@ class KiteServiceImplTest {
         @Test
         void rejectsWhenBothSymbolAndStockIdBlank() {
             KiteOrderRequestDto req = validOrder();
-            req.setSymbol("");
+            req.setTradingsymbol("");
 
             assertThatThrownBy(() -> service.placeOrder(req))
                     .isInstanceOf(IllegalArgumentException.class)
@@ -238,7 +238,7 @@ class KiteServiceImplTest {
         void validationFailsBeforeKiteCallEvenInSandbox() {
             props.setSandbox(true);
             KiteOrderRequestDto req = validOrder();
-            req.setSymbol("");
+            req.setTradingsymbol("");
 
             assertThatThrownBy(() -> service.placeOrder(req))
                     .isInstanceOf(IllegalArgumentException.class);
@@ -420,7 +420,7 @@ class KiteServiceImplTest {
         void rejectsUnknownStockId() {
             KiteOrderRequestDto req = validOrder();
             req.setStockId(999L);
-            req.setSymbol(null);
+            req.setTradingsymbol(null);
             when(stockInfoRepository.findById(999L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> service.placeOrder(req))
@@ -433,14 +433,14 @@ class KiteServiceImplTest {
         void resolvesSymbolFromStockDetailsEntity() {
             KiteOrderRequestDto req = validOrder();
             req.setStockId(42L);
-            req.setSymbol(null);
+            req.setTradingsymbol(null);
             when(stockInfoRepository.findById(42L)).thenReturn(Optional.of(
                     StockInfoEntity.builder().id(42L).symbol("INFY").build()
             ));
 
             KiteOrderResponseDto resp = service.placeOrder(req);
 
-            assertThat(req.getSymbol()).isEqualTo("INFY");
+            assertThat(req.getTradingsymbol()).isEqualTo("INFY");
             assertThat(resp.getKiteOrderId()).startsWith("SANDBOX-");
             ArgumentCaptor<KiteOrderAuditEntity> captor = ArgumentCaptor.forClass(KiteOrderAuditEntity.class);
             verify(auditRepository).save(captor.capture());
@@ -453,21 +453,21 @@ class KiteServiceImplTest {
         void prefersEntitySymbolOverRequestSymbol() {
             KiteOrderRequestDto req = validOrder();
             req.setStockId(42L);
-            req.setSymbol("STALE");
+            req.setTradingsymbol("STALE");
             when(stockInfoRepository.findById(42L)).thenReturn(Optional.of(
                     StockInfoEntity.builder().id(42L).symbol("INFY").build()
             ));
 
             service.placeOrder(req);
 
-            assertThat(req.getSymbol()).isEqualTo("INFY");
+            assertThat(req.getTradingsymbol()).isEqualTo("INFY");
         }
 
         @Test
         void fillsExchangeFromDefaultWhenBlank() {
             KiteOrderRequestDto req = validOrder();
             req.setStockId(42L);
-            req.setSymbol(null);
+            req.setTradingsymbol(null);
             req.setExchange(null);
             when(stockInfoRepository.findById(42L)).thenReturn(Optional.of(
                     StockInfoEntity.builder().id(42L).symbol("INFY").build()
@@ -485,7 +485,7 @@ class KiteServiceImplTest {
             service.placeOrder(req);
 
             verify(stockInfoRepository, never()).findById(any());
-            assertThat(req.getSymbol()).isEqualTo("INFY");
+            assertThat(req.getTradingsymbol()).isEqualTo("INFY");
         }
     }
 
@@ -569,6 +569,92 @@ class KiteServiceImplTest {
             assertThat(dto.getTransactionType()).isEqualTo("SELL");
             assertThat(dto.getKiteOrderId()).isEqualTo("KITE-X");
             assertThat(dto.isSandbox()).isFalse();
+        }
+    }
+
+    @Nested
+    class GetQuote {
+
+        @Test
+        void rejectsBlankExchange() {
+            assertThatThrownBy(() -> service.getQuote("", "INFY"))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("exchange");
+            verify(kiteClient, never()).getQuote(anyString(), anyString(), anyString());
+        }
+
+        @Test
+        void rejectsBlankSymbol() {
+            assertThatThrownBy(() -> service.getQuote("NSE", "  "))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("symbol");
+        }
+
+        @Test
+        void sandboxModeReturnsSandboxEnvelopeWithoutCallingKite() {
+            props.setSandbox(true);
+
+            KiteModels.KiteQuoteEnvelope env = service.getQuote("NSE", "INFY");
+
+            assertThat(env.isPaidDataRequired()).isFalse();
+            assertThat(env.getErrorType()).isEqualTo("SandboxMode");
+            assertThat(env.getQuote()).isNull();
+            verify(kiteClient, never()).getQuote(anyString(), anyString(), anyString());
+        }
+
+        @Test
+        void requiresActiveSessionInLiveMode() {
+            props.setSandbox(false);
+            when(sessionRepository.findById(1L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> service.getQuote("NSE", "INFY"))
+                    .isInstanceOf(KiteException.class)
+                    .extracting("statusCode").isEqualTo(401);
+            verify(kiteClient, never()).getQuote(anyString(), anyString(), anyString());
+        }
+
+        @Test
+        void delegatesToClientAndReturnsEnvelope() {
+            props.setSandbox(false);
+            when(sessionRepository.findById(1L)).thenReturn(Optional.of(activeSession()));
+            KiteModels.KiteQuoteEnvelope upstream = KiteModels.KiteQuoteEnvelope.builder()
+                    .paidDataRequired(false)
+                    .quote(KiteModels.KiteQuote.builder()
+                            .tradingSymbol("INFY")
+                            .exchange("NSE")
+                            .lastPrice(1500.0)
+                            .change(12.5)
+                            .ohlc(KiteModels.KiteOhlc.builder().open(1480.0).high(1510.0).low(1475.0).close(1487.5).build())
+                            .depth(KiteModels.KiteDepth.builder()
+                                    .buy(List.of(KiteModels.KiteDepthLevel.builder().price(1499.5).quantity(100).orders(5).build()))
+                                    .sell(List.of(KiteModels.KiteDepthLevel.builder().price(1500.5).quantity(80).orders(3).build()))
+                                    .build())
+                            .build())
+                    .build();
+            when(kiteClient.getQuote("NSE", "INFY", ACCESS_TOKEN)).thenReturn(upstream);
+
+            KiteModels.KiteQuoteEnvelope env = service.getQuote("NSE", "INFY");
+
+            assertThat(env.getQuote().getLastPrice()).isEqualTo(1500.0);
+            assertThat(env.getQuote().getDepth().getBuy()).hasSize(1);
+            assertThat(env.isPaidDataRequired()).isFalse();
+        }
+
+        @Test
+        void paidDataRequiredFlagBubblesUp() {
+            props.setSandbox(false);
+            when(sessionRepository.findById(1L)).thenReturn(Optional.of(activeSession()));
+            KiteModels.KiteQuoteEnvelope upstream = KiteModels.KiteQuoteEnvelope.builder()
+                    .paidDataRequired(true)
+                    .errorType("DataException")
+                    .message("No quotes available for the given instrument")
+                    .build();
+            when(kiteClient.getQuote("NSE", "INFY", ACCESS_TOKEN)).thenReturn(upstream);
+
+            KiteModels.KiteQuoteEnvelope env = service.getQuote("NSE", "INFY");
+
+            assertThat(env.isPaidDataRequired()).isTrue();
+            assertThat(env.getErrorType()).isEqualTo("DataException");
         }
     }
 }

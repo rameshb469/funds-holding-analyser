@@ -22,4 +22,24 @@ public interface KiteService {
     List<KiteOrderDto> getOrderBook();
 
     List<KiteOrderAuditDto> getRecentAudits();
+
+    /**
+     * Real-time quote (LTP, OHLC, depth) for one instrument. Requires a live
+     * Kite session. The returned envelope carries {@code paidDataRequired=true}
+     * when Kite rejects with a data/permission error (e.g. free plan).
+     */
+    KiteModels.KiteQuoteEnvelope getQuote(String exchange, String tradingSymbol);
+
+    /**
+     * Batch quote fetch for up to N instruments in one Kite call. Each input must
+     * be in the form {@code "EXCHANGE:SYMBOL"}; the returned envelopes are
+     * positionally aligned with the input list.
+     */
+    List<KiteModels.KiteQuoteEnvelope> getQuotes(List<String> exchangeSymbols);
+
+    /**
+     * Cancel a regular Kite order. Used by the order-execution agent to ratchet
+     * the SL-M up the ladder.
+     */
+    void cancelOrder(String kiteOrderId);
 }

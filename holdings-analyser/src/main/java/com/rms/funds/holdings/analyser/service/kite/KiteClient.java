@@ -113,6 +113,161 @@ public class KiteClient {
         return parseList(resp.getBody().get("data"), KiteModels.KiteOrderEntry.class);
     }
 
+    public KiteModels.KiteQuoteEnvelope getQuote(String exchange, String tradingsymbol, String accessToken) {
+        String instrument = exchange + ":" + tradingsymbol;
+        HttpHeaders headers = authHeaders(accessToken);
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        try {
+            ResponseEntity<JsonNode> resp = invokeWithErrorHandling(
+                    props.getBaseUrl() + "/quote?i=" + urlEncode(instrument),
+                    HttpMethod.GET,
+                    entity,
+                    JsonNode.class
+            );
+            return parseQuoteEnvelope(resp, instrument);
+        } catch (KiteException ex) {
+            if (isPaidDataRequired(ex.getErrorType())) {
+                return KiteModels.KiteQuoteEnvelope.builder()
+                        .paidDataRequired(true)
+                        .errorType(ex.getErrorType())
+                        .message(ex.getMessage())
+                        .build();
+            }
+            throw ex;
+        }
+    }
+
+    /**
+     * Multi-instrument quote fetch. Kite accepts repeated {@code i=} query params and
+     * the response is keyed by the same "EXCHANGE:SYMBOL" identifiers. Returns a list of
+     * (instrumentKey, envelope) pairs in the order the caller asked for. On paid-data
+     * errors the envelope carries {@code paidDataRequired=true} and a null quote.
+     */
+    public List<KiteModels.KiteQuoteEnvelope> getQuotes(List<String> exchangeSymbols, String accessToken) {
+        if (exchangeSymbols == null || exchangeSymbols.isEmpty()) {
+            return Collections.emptyList();
+        }
+        StringBuilder url = new StringBuilder(props.getBaseUrl()).append("/quote?");
+        for (int i = 0; i < exchangeSymbols.size(); i++) {
+            if (i > 0) {
+                url.append("&");
+            }
+            url.append("i=").append(urlEncode(exchangeSymbols.get(i)));
+        }
+        HttpHeaders headers = authHeaders(accessToken);
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+        try {
+            ResponseEntity<JsonNode> resp = invokeWithErrorHandling(
+                    url.toString(), HttpMethod.GET, entity, JsonNode.class);
+            JsonNode body = resp.getBody();
+            java.util.List<KiteModels.KiteQuoteEnvelope> out = new java.util.ArrayList<>(exchangeSymbols.size());
+            if (body == null) {
+                return out;
+            }
+            for (String key : exchangeSymbols) {
+                out.add(parseQuoteEnvelopeFromBody(body, key));
+            }
+            return out;
+        } catch (KiteException ex) {
+            if (isPaidDataRequired(ex.getErrorType())) {
+                java.util.List<KiteModels.KiteQuoteEnvelope> out = new java.util.ArrayList<>(exchangeSymbols.size());
+                for (int i = 0; i < exchangeSymbols.size(); i++) {
+                    out.add(KiteModels.KiteQuoteEnvelope.builder()
+                            .paidDataRequired(true)
+                            .errorType(ex.getErrorType())
+                            .message(ex.getMessage())
+                            .build());
+                }
+                return out;
+            }
+            throw ex;
+        }
+    }
+
+    public void cancelOrder(String kiteOrderId, String accessToken) {
+        HttpHeaders headers = authHeaders(accessToken);
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+        invokeWithErrorHandling(
+                props.getBaseUrl() + "/orders/regular/" + urlEncode(kiteOrderId),
+                HttpMethod.DELETE,
+                entity,
+                JsonNode.class
+        );
+    }
+
+    public KiteModels.KiteQuoteEnvelope getQuoteOhlc(String exchange, String tradingsymbol, String accessToken) {
+        String instrument = exchange + ":" + tradingsymbol;
+        HttpHeaders headers = authHeaders(accessToken);
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        try {
+            ResponseEntity<JsonNode> resp = invokeWithErrorHandling(
+                    props.getBaseUrl() + "/quote/ohlc?i=" + urlEncode(instrument),
+                    HttpMethod.GET,
+                    entity,
+                    JsonNode.class
+            );
+            return parseQuoteEnvelope(resp, instrument);
+        } catch (KiteException ex) {
+            if (isPaidDataRequired(ex.getErrorType())) {
+                return KiteModels.KiteQuoteEnvelope.builder()
+                        .paidDataRequired(true)
+                        .errorType(ex.getErrorType())
+                        .message(ex.getMessage())
+                        .build();
+            }
+            throw ex;
+        }
+    }
+
+    private KiteModels.KiteQuoteEnvelope parseQuoteEnvelope(ResponseEntity<JsonNode> resp, String instrument) {
+        if (resp == null || resp.getBody() == null) {
+            return KiteModels.KiteQuoteEnvelope.builder()
+                    .paidDataRequired(false)
+                    .build();
+        }
+        return parseQuoteEnvelopeFromBody(resp.getBody(), instrument);
+    }
+
+    private KiteModels.KiteQuoteEnvelope parseQuoteEnvelopeFromBody(JsonNode body, String instrument) {
+        if (body == null) {
+            return KiteModels.KiteQuoteEnvelope.builder()
+                    .paidDataRequired(false)
+                    .build();
+        }
+        JsonNode data = body.get("data");
+        JsonNode instrumentNode = data != null ? data.get(instrument) : null;
+        if (instrumentNode == null && data != null && data.get("ohlc") != null) {
+            instrumentNode = data.get("ohlc").get(instrument);
+        }
+        KiteModels.KiteQuote quote = null;
+        if (instrumentNode != null && instrumentNode.isObject()) {
+            try {
+                quote = objectMapper.treeToValue(instrumentNode, KiteModels.KiteQuote.class);
+            } catch (IOException e) {
+                log.debug("Could not parse Kite quote body for {}: {}", instrument, e.getMessage());
+            }
+        }
+        return KiteModels.KiteQuoteEnvelope.builder()
+                .raw(body.toString())
+                .quote(quote)
+                .paidDataRequired(false)
+                .build();
+    }
+
+    private static boolean isPaidDataRequired(String errorType) {
+        if (errorType == null) {
+            return false;
+        }
+        String t = errorType.toLowerCase();
+        return t.contains("data")
+                || t.contains("permission")
+                || t.contains("denied")
+                || t.contains("subscription")
+                || t.contains("forbidden");
+    }
+
     public List<KiteModels.KitePosition> getPositions(String accessToken) {
         HttpHeaders headers = authHeaders(accessToken);
         HttpEntity<Void> entity = new HttpEntity<>(headers);

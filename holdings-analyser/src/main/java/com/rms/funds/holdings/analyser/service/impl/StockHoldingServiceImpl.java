@@ -203,6 +203,7 @@ public class StockHoldingServiceImpl implements StockHoldingService {
                             .exposureChange(exposureChange)
                             .relativeChangePct(relativeChangePct)
                             .fundCountChange(fundCountChange)
+                            .marketCapCategory(stock.getMarketCapCategory())
                     .build());
         }
 

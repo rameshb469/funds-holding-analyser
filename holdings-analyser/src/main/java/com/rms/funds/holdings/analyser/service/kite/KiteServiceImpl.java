@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -133,6 +134,59 @@ public class KiteServiceImpl implements KiteService {
         return auditRepository.findTop50ByOrderByCreatedAtDesc().stream()
                 .map(this::toAuditDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public KiteModels.KiteQuoteEnvelope getQuote(String exchange, String tradingSymbol) {
+        if (exchange == null || exchange.isBlank()) {
+            throw new IllegalArgumentException("exchange is required");
+        }
+        if (tradingSymbol == null || tradingSymbol.isBlank()) {
+            throw new IllegalArgumentException("symbol is required");
+        }
+        if (props.isSandbox()) {
+            return KiteModels.KiteQuoteEnvelope.builder()
+                    .paidDataRequired(false)
+                    .errorType("SandboxMode")
+                    .message("Quotes are not fetched in sandbox mode — flip kite.sandbox=false to call Kite.")
+                    .build();
+        }
+        KiteSessionEntity session = requireSession();
+        return kiteClient.getQuote(exchange, tradingSymbol, session.getAccessToken());
+    }
+
+    @Override
+    public List<KiteModels.KiteQuoteEnvelope> getQuotes(List<String> exchangeSymbols) {
+        if (exchangeSymbols == null || exchangeSymbols.isEmpty()) {
+            return Collections.emptyList();
+        }
+        if (props.isSandbox()) {
+            java.util.List<KiteModels.KiteQuoteEnvelope> out = new java.util.ArrayList<>(exchangeSymbols.size());
+            for (int i = 0; i < exchangeSymbols.size(); i++) {
+                out.add(KiteModels.KiteQuoteEnvelope.builder()
+                        .paidDataRequired(false)
+                        .errorType("SandboxMode")
+                        .message("Quotes are not fetched in sandbox mode.")
+                        .build());
+            }
+            return out;
+        }
+        KiteSessionEntity session = requireSession();
+        return kiteClient.getQuotes(exchangeSymbols, session.getAccessToken());
+    }
+
+    @Override
+    @Transactional
+    public void cancelOrder(String kiteOrderId) {
+        if (kiteOrderId == null || kiteOrderId.isBlank()) {
+            throw new IllegalArgumentException("kiteOrderId is required");
+        }
+        if (props.isSandbox()) {
+            log.info("Sandbox cancelOrder({}) — no upstream call", kiteOrderId);
+            return;
+        }
+        KiteSessionEntity session = requireSession();
+        kiteClient.cancelOrder(kiteOrderId, session.getAccessToken());
     }
 
     private void validate(KiteOrderRequestDto req) {

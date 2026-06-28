@@ -5,11 +5,19 @@ import com.rms.funds.holdings.analyser.controller.dto.KiteOrderAuditDto;
 import com.rms.funds.holdings.analyser.controller.dto.KiteOrderDto;
 import com.rms.funds.holdings.analyser.controller.dto.KiteOrderRequestDto;
 import com.rms.funds.holdings.analyser.controller.dto.KiteOrderResponseDto;
+import com.rms.funds.holdings.analyser.controller.dto.KiteQuoteDto;
 import com.rms.funds.holdings.analyser.controller.dto.KiteSessionStatusDto;
 import com.rms.funds.holdings.analyser.controller.dto.KiteStockRefDto;
+import com.rms.funds.holdings.analyser.controller.dto.agent.OrderAgentCycleDto;
+import com.rms.funds.holdings.analyser.controller.dto.agent.OrderAgentPositionDto;
+import com.rms.funds.holdings.analyser.controller.dto.agent.OrderAgentStatusDto;
 import com.rms.funds.holdings.analyser.entity.StockInfoEntity;
+import com.rms.funds.holdings.analyser.repository.OrderAgentCycleRepository;
+import com.rms.funds.holdings.analyser.repository.OrderAgentPositionRepository;
 import com.rms.funds.holdings.analyser.repository.StockInfoRepository;
+import com.rms.funds.holdings.analyser.service.agent.OrderExecutionAgentService;
 import com.rms.funds.holdings.analyser.service.kite.KiteException;
+import com.rms.funds.holdings.analyser.service.kite.KiteModels;
 import com.rms.funds.holdings.analyser.service.kite.KiteService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,6 +45,9 @@ public class BrokerController {
 
     private final KiteService kiteService;
     private final StockInfoRepository stockInfoRepository;
+    private final OrderAgentCycleRepository agentCycleRepository;
+    private final OrderAgentPositionRepository agentPositionRepository;
+    private final OrderExecutionAgentService orderAgent;
 
     @GetMapping("/login-url")
     public KiteLoginUrlDto loginUrl() {
@@ -84,6 +96,91 @@ public class BrokerController {
                         .isinNumber(s.getIsinNumber())
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    @GetMapping("/quote")
+    public KiteQuoteDto quote(@RequestParam("exchange") String exchange,
+                              @RequestParam("symbol") String symbol) {
+        KiteModels.KiteQuoteEnvelope env = kiteService.getQuote(exchange, symbol);
+        return toQuoteDto(env);
+    }
+
+    @GetMapping("/agent/status")
+    public OrderAgentStatusDto agentStatus() {
+        return orderAgent.status();
+    }
+
+    @GetMapping("/agent/cycles")
+    public List<OrderAgentCycleDto> agentCycles() {
+        return agentCycleRepository.findTop20ByOrderByCreatedAtDesc().stream()
+                .map(orderAgent::toCycleDto)
+                .toList();
+    }
+
+    @GetMapping("/agent/cycles/{id}/positions")
+    public List<OrderAgentPositionDto> agentPositions(@PathVariable("id") Long cycleId) {
+        return agentPositionRepository.findByCycleId(cycleId).stream()
+                .map(orderAgent::toPositionDto)
+                .toList();
+    }
+
+    @PostMapping("/agent/trigger")
+    public OrderAgentCycleDto agentTrigger() {
+        return orderAgent.triggerNow();
+    }
+
+    @PostMapping("/agent/stop")
+    public Map<String, Object> agentStop() {
+        List<String> tail = orderAgent.stopMonitor();
+        return Map.of("stopped", true, "tail", tail);
+    }
+
+    private KiteQuoteDto toQuoteDto(KiteModels.KiteQuoteEnvelope env) {
+        if (env == null) {
+            return KiteQuoteDto.builder().paidDataRequired(false).build();
+        }
+        KiteModels.KiteQuote q = env.getQuote();
+        KiteQuoteDto.KiteOhlcDto ohlc = q != null && q.getOhlc() != null
+                ? KiteQuoteDto.KiteOhlcDto.builder()
+                        .open(q.getOhlc().getOpen())
+                        .high(q.getOhlc().getHigh())
+                        .low(q.getOhlc().getLow())
+                        .close(q.getOhlc().getClose())
+                        .build()
+                : null;
+        KiteQuoteDto.KiteDepthDto depth = q != null && q.getDepth() != null
+                ? KiteQuoteDto.KiteDepthDto.builder()
+                        .buy(q.getDepth().getBuy() == null ? java.util.List.of() : q.getDepth().getBuy().stream()
+                                .map(l -> KiteQuoteDto.KiteDepthLevelDto.builder()
+                                        .price(l.getPrice())
+                                        .quantity(l.getQuantity())
+                                        .orders(l.getOrders())
+                                        .build())
+                                .collect(Collectors.toList()))
+                        .sell(q.getDepth().getSell() == null ? java.util.List.of() : q.getDepth().getSell().stream()
+                                .map(l -> KiteQuoteDto.KiteDepthLevelDto.builder()
+                                        .price(l.getPrice())
+                                        .quantity(l.getQuantity())
+                                        .orders(l.getOrders())
+                                        .build())
+                                .collect(Collectors.toList()))
+                        .build()
+                : null;
+        return KiteQuoteDto.builder()
+                .instrumentToken(q == null ? null : q.getInstrumentToken())
+                .tradingSymbol(q == null ? null : q.getTradingSymbol())
+                .exchange(q == null ? null : q.getExchange())
+                .lastPrice(q == null ? null : q.getLastPrice())
+                .change(q == null ? null : q.getChange())
+                .ohlc(ohlc)
+                .depth(depth)
+                .volume(q == null ? null : q.getVolume())
+                .averagePrice(q == null ? null : q.getAveragePrice())
+                .paidDataRequired(env.isPaidDataRequired()
+                        || (q != null && q.getDepth() == null && (q.getLastPrice() == null || q.getLastPrice() == 0.0)))
+                .errorType(env.getErrorType())
+                .message(env.getMessage())
+                .build();
     }
 
     @org.springframework.web.bind.annotation.ExceptionHandler(KiteException.class)

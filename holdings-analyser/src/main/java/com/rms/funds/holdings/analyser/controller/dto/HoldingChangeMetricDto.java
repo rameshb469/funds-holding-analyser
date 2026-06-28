@@ -31,5 +31,6 @@ public class HoldingChangeMetricDto {
         private double relativeChangePct;  // % change in avg weight
         private int fundCountChange;       // fund breadth change
         private double score;              // composite score
+        private String marketCapCategory;  // LARGE_CAP / MID_CAP / SMALL_CAP / MICRO_CAP (or legacy spellings)
     }
 }

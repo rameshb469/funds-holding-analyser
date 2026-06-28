@@ -51,4 +51,16 @@ kite:
   login-redirect-uri: http://127.0.0.1:8080/api/broker/callback
   sandbox: false
 
+agent:
+  enabled: ${AGENT_ENABLED:true}
+  capital-per-cycle: ${AGENT_CAPITAL_PER_CYCLE:100000}
+  stop-loss-pct: ${AGENT_STOP_LOSS_PCT:0.03}
+  ladder-level1-pct: ${AGENT_LADDER_L1:0.05}
+  ladder-level2-pct: ${AGENT_LADDER_L2:0.10}
+  ladder-level3-pct: ${AGENT_LADDER_L3:0.15}
+  ladder-exit-fraction: ${AGENT_LADDER_EXIT_FRACTION:0.33}
+  eod-liquidate-below-floor: ${AGENT_EOD_LIQUIDATE:true}
+  picks-per-cycle: ${AGENT_PICKS:5}
+  monitor-interval-ms: ${AGENT_MONITOR_INTERVAL_MS:1000}
+
 

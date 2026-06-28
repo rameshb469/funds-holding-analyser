@@ -110,7 +110,7 @@ public class MarketCapUpdateService  implements CommandLineRunner {
         } else if (rank <= 550) {
             return MarketCapCategoryType.SMALL_CAP;
         } else {
-            return MarketCapCategoryType.MIRCO_CAP;
+            return MarketCapCategoryType.MICRO_CAP;
         }
     }
 

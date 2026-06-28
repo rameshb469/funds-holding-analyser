@@ -101,4 +101,85 @@ public class KiteModels {
         private Integer dayBuyQuantity;
         private Integer daySellQuantity;
     }
+
+    /**
+     * Subset of the {@code /quote} response. Depth is the 5-level bid/ask book
+     * and is only populated on paid Kite Connect plans; on the free plan Kite
+     * returns the body but with {@code depth} absent or null.
+     */
+    @Builder(toBuilder = true)
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class KiteQuote {
+        private String instrumentToken;
+        private String tradingSymbol;
+        private String exchange;
+        private Double lastPrice;
+        private Double change;
+        private KiteOhlc ohlc;
+        private KiteDepth depth;
+        private Integer volume;
+        private Double averagePrice;
+        private Double lowerCircuitLimit;
+        private Double upperCircuitLimit;
+        private Double openInterest;
+    }
+
+    @Builder(toBuilder = true)
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class KiteOhlc {
+        private Double open;
+        private Double high;
+        private Double low;
+        private Double close;
+    }
+
+    @Builder(toBuilder = true)
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class KiteDepth {
+        private List<KiteDepthLevel> buy;
+        private List<KiteDepthLevel> sell;
+    }
+
+    @Builder(toBuilder = true)
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class KiteDepthLevel {
+        private Double price;
+        private Integer quantity;
+        private Integer orders;
+    }
+
+    @Builder(toBuilder = true)
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class KiteQuoteEnvelope {
+        /** Raw response text — used to surface the upstream message if parsing fails. */
+        private String raw;
+        /** Parsed quote if the response was well-formed. May be null on the free plan. */
+        private KiteQuote quote;
+        /** Set true when Kite returns a DataException / permission error indicating paid data is required. */
+        private boolean paidDataRequired;
+        /** Upstream error_type if any (e.g. "DataException", "PermissionDenied"). */
+        private String errorType;
+        /** Upstream message, if any. */
+        private String message;
+    }
 }
